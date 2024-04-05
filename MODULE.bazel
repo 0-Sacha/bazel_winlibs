@@ -1,0 +1,7 @@
+
+""
+module(
+    name = "bazel_mingw",
+    version = "0.0.1",
+    repo_name = "sacha_bazel_mingw",
+)
