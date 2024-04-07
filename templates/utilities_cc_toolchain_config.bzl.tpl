@@ -210,10 +210,10 @@ def features_all(ctx):
     return features
 
 def action_configs_all(ctx):
+    action_configs = []
     action_configs += add_action_configs(
         ctx.attr.toolchain_bins,
         ctx.attr.compiler.get("cpp", ctx.attr.compiler.get("cxx", "gcc")),
-        "cpp",
         [
             ACTION_NAMES.cpp_compile,
             ACTION_NAMES.cpp_header_parsing,

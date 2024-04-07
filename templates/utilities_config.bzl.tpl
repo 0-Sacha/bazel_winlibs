@@ -32,15 +32,16 @@ def _get_tool_path(bins, tool_name, base_name = "", extention = ""):
     print("Warrning: multiple Tool Found for {} !!. Keeping best : {}".format(tool_name, best))
     return best
     
-def add_action_configs(bins, compiler, tool_name, action_names, implies = []):
-    tool_name_compiler = compiler[tool_name] if tool_name in compiler else tool_name
+def add_action_configs(bins, tool_name, action_names, implies = []):
     action_configs = []
     for action_name in action_names:
-        action_configs.append(action_config(
-            action_name = action_name,
-            tools = [ tool_path(name = tool_name, path = _get_tool_path(bins, tool_name_compiler)) ],
-            implies = implies
-        ))
+        action_configs.append(
+            action_config(
+                action_name = action_name,
+                tools = [ tool_path(name = tool_name, path = _get_tool_path(bins, tool_name)) ],
+                implies = implies
+            )
+        )
     return action_configs
 
 def register_tools(tools):
