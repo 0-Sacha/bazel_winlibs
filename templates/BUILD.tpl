@@ -34,6 +34,9 @@ cc_toolchain_config(
     ],
     lib_directories = [
         "%{toolchain_path_prefix}x86_64-w64-mingw32/lib",
+    ],
+    toolchain_libs = [
+        "pthread"
     ]
 )
 

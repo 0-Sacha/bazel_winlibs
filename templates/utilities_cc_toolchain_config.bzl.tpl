@@ -60,6 +60,7 @@ ACTIONS_FEATURES_LUT_COV = {
 }
 
 def flags_unpack(flags_packed):
+    ""
     flags_unpacked = {}
     for flag_type, flag_flags in flags_packed.items():
         # filters name and json mode
@@ -70,8 +71,8 @@ def flags_unpack(flags_packed):
             flag_flags = flag_flags.split(';')
             flag_type = flag_type[1:]
         
-        if flag_type.startswith('%'):
         filter_name = flag_type
+        if flag_type.startswith('%'):
             flag_type = flag_type[flag_type.find('%') + 1:]
         
         patterns = flag_type.split('/')
@@ -79,9 +80,9 @@ def flags_unpack(flags_packed):
         with_features = []
         if len(patterns) > 1:
             features_filters = patterns[1].split(';')
-            for filter in features_filters
+            for filter in features_filters:
                 if filter.startswith('[') == False:
-                    if filter.startswith('!')
+                    if filter.startswith('!'):
                         with_features.append(with_feature_set(not_features = [filter]))
                     else:
                         with_features.append(with_feature_set(features = [filter]))
@@ -90,7 +91,7 @@ def flags_unpack(flags_packed):
                     for subfilter in filters:
                         f_with = []
                         f_without = []
-                        if subfilter.startswith('!')
+                        if subfilter.startswith('!'):
                             f_without.append(subfilter)
                         else:
                             f_with.append(subfilter)
@@ -101,7 +102,7 @@ def flags_unpack(flags_packed):
             "with_features": with_features,
             "flags": flag_flags
         }
-    return flags
+    return flags_unpacked
 
 def feature_common_flags(name, flags_unpacked, actions_lut, enabled = True, provides = []):
     ""
@@ -112,7 +113,7 @@ def feature_common_flags(name, flags_unpacked, actions_lut, enabled = True, prov
                 flag_set(
                     actions = actions_lut[flag_data["type"]],
                     flag_groups = [ flag_group( flags = flag_data["flags"]) ],
-                    with_features = flag_data["with_features"],
+                    with_features = flag_data["with_features"]
                 )
             )
     _feature = feature(
@@ -142,10 +143,10 @@ def feature_common_add(name, actions, flags, enabled = True):
                 flag_groups = [
                     flag_group(
                         flags = flags
-                    ),
-                ],
-            ),
-        ],
+                    )
+                ]
+            )
+        ]
     )
 
 def features_DIL(preprocessor_defines, include_directories, lib_directories):
@@ -180,6 +181,14 @@ def features_DIL(preprocessor_defines, include_directories, lib_directories):
         )
     return features
 
+def feature_link_libs(name, linklibs):
+    all_linklibs = [ "-l{}".format(linklib) for linklib in linklibs]
+    return feature_common_add(
+        name = name,
+        actions = ACTIONS_LINK_ALL,
+        flags = all_linklibs
+    )
+
 def features_well_known(ctx):
     ""
     features = []
@@ -200,9 +209,11 @@ def features_all(ctx):
         features.append(feature(name = extra_feature))
 
     flags_unpacked = flags_unpack(ctx.attr.flags)
-    features += feature_default_compile_flags(flags_unpacked)
-    features += feature_default_link_flags(flags_unpacked)
-    features += feature_coverage(flags_unpacked)
+    features.append(feature_default_compile_flags(flags_unpacked))
+    features.append(feature_default_link_flags(flags_unpacked))
+    features.append(feature_coverage(flags_unpacked))
+
+    features.append(feature_link_libs("toolchain_libs", ctx.attr.toolchain_libs))
     
     features += features_well_known(ctx)
     
@@ -279,7 +290,7 @@ def get_artifacts_patterns(artifacts_patterns_packed):
             artifact_name_pattern(
                 category_name = unpacked[0],
                 prefix = unpacked[1],
-                extension = unpacked[2],
+                extension = unpacked[2]
             )
         )
     return patterns
@@ -359,7 +370,7 @@ cc_toolchain_config = rule(
         
         'tools': attr.string_dict(default = {}), 
 
-        'link_libs': attr.string_list(default = []),
+        'toolchain_libs': attr.string_list(default = []),
 
         'abi_version': attr.string(default = "local"),
         'abi_libc_version': attr.string(default = "local"),
