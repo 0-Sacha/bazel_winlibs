@@ -22,11 +22,10 @@ load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load(
     "@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
     "feature",
-    "feature_set",
     "flag_group",
     "flag_set",
-    "tool_path",
     "with_feature_set",
+    "artifact_name_pattern"
 )
 load("//:utilities_action_names.bzl",
     "ACTIONS_COMPILE_ALL",
@@ -37,8 +36,8 @@ load("//:utilities_action_names.bzl",
     "ACTIONS_LINK_LTO",
     "ACTIONS_LINK_ALL"
 )
+load("//:utilities_config.bzl", "add_action_configs", "register_tools")
 load("//:utilities_toolchain_config_feature_legacy.bzl", "features_module_maps", "features_legacy")
-load("//:utilities_config.bzl", "add_action_configs", "features_legacy", "register_tools")
 
 ACTIONS_FEATURES_LUT = {
     "all": ACTIONS_COMPILE_ALL,
@@ -53,24 +52,25 @@ ACTIONS_FEATURES_LUT = {
 
 def features_flags(flags):
     features = []
-    for _filter, flags in flags.items():
+    for flags_pattern, flags in flags.items():
         # filters name and json mode
-        if _filter.startswith('$'):
+        if flags_pattern.startswith('$'):
             flags = json.decode(flags)
-            _filter = _filter[1:]
-        else if _filter.startswith('#'):
+            flags_pattern = flags_pattern[1:]
+        elif flags_pattern.startswith('#'):
             flags = flags.split(';')
-            _filter = _filter[1:]
+            flags_pattern = flags_pattern[1:]
         
-        filter_name = _filter
-        if _filter.startswith('%'):
-            _filter = _filter[_filter.find('%') + 1:]
+        filter_name = flags_pattern
+        if flags_pattern.startswith('%'):
+            flags_pattern = flags_pattern[flags_pattern.find('%') + 1:]
         
         # features restrictions on flags
-        if len(_filter) == 1:
-            filter.append([])
-        else if:
-            filter[1] = filter[1].split(";")
+        patterns = flags_pattern.split('/')
+        if len(patterns) == 1:
+            patterns.append([])
+        else:
+            patterns[1] = patterns[1].split(";")
         
         features.append(
             feature(
@@ -78,24 +78,23 @@ def features_flags(flags):
                 enabled = True,
                 flag_sets = [
                     flag_set(
-                        actions = ACTIONS_FEATURES_LUT[filter[0]],
+                        actions = ACTIONS_FEATURES_LUT[patterns[0]],
                         flag_groups = ([
                             flag_group(
                                 flags = flags,
                             ),
                         ]),
                     )],
-                with_features = [with_feature_set(features = filter[1])],
+                with_features = [with_feature_set(features = patterns[1])],
             )
         )
     return features
 
 def features_DIL(preprocessor_defines, include_directories, lib_directories):
     features = []
-    all_defines = [ "-D{}".format(define) for define in preprocessor_defines]
+    all_defines = [ "-D{}".format(define) for define in preprocessor_defines ]
     all_includedirs = [ "-I{}".format(includedir) for includedir in include_directories]
     all_linkdirs = [ "-L{}".format(linkdir) for linkdir in lib_directories]
-
     features.append(
         feature(
             name = "toolchain_config_defines",
@@ -144,15 +143,43 @@ def features_DIL(preprocessor_defines, include_directories, lib_directories):
             ],
         )
     )
-
     return features
 
-def features_well_known():
+# Note that we also set --coverage for c++-link-nodeps-dynamic-library. The
+# generated code contains references to gcov symbols, and the dynamic linker
+# can't resolve them unless the library is linked against gcov.
+def feature_coverage(ctx):
+    return feature(
+        name = "coverage",
+        provides = ["profile"],
+        flag_sets = [
+            flag_set(
+                actions = [
+                    ACTION_NAMES.preprocess_assemble,
+                    ACTION_NAMES.c_compile,
+                    ACTION_NAMES.cpp_compile,
+                    ACTION_NAMES.cpp_header_parsing,
+                    ACTION_NAMES.cpp_module_compile,
+                ],
+                flag_groups = ([
+                    flag_group(flags = ctx.attr.coverage_compile_flags),
+                ] if ctx.attr.coverage_compile_flags else []),
+            ),
+            flag_set(
+                actions = ACTIONS_LINK_ALL,
+                flag_groups = ([
+                    flag_group(flags = ctx.attr.coverage_link_flags),
+                ] if ctx.attr.coverage_link_flags else []),
+            ),
+        ],
+    )
+
+def features_well_known(ctx):
     features = []
     
     features.append(feature(name = "supports_pic", enabled = True))
     features.append(feature(name = "supports_dynamic_linker", enabled = True))
-    if "supports_start_end_lib" in extras_features:
+    if "supports_start_end_lib" in ctx.attr.enable_features:
         features.append(feature(name = "supports_start_end_lib", enabled = True))
 
     return features
@@ -168,18 +195,17 @@ def features_all(ctx):
         features.append(feature(name = extra_feature))
 
     features += features_flags(ctx.attr.flags)
-    features += features_well_known()
+    features += features_well_known(ctx)
     
     features += features_DIL(
         ctx.attr.preprocessor_defines,
-        ctx.attr.include_directories + (cxx_builtin_include_directories if ctx.attr.include_directories_use_builtin else []),
+        ctx.attr.include_directories + (ctx.attr.cxx_builtin_include_directories if ctx.attr.include_directories_use_builtin else []),
         ctx.attr.lib_directories
     )
     
     return features
 
 def action_configs_all(ctx):
-    compiler = get_default_compiler(ctx.attr.compiler)
     action_configs += add_action_configs(
         ctx.attr.toolchain_bins,
         ctx.attr.compiler.get("cpp", ctx.attr.compiler.get("cxx", "gcc")),
@@ -235,10 +261,10 @@ def action_configs_all(ctx):
     return action_configs
 
 def get_artifacts_patterns(artifacts_patterns_packed):
-    artifacts_patterns_categories = artifacts_patterns.split(',')
+    artifacts_patterns_categories = artifacts_patterns_packed.split(',')
     patterns = []
     for category in artifacts_patterns_categories:
-        unpacked = artifacts_patterns_categories.split('/')
+        unpacked = category.split('/')
         patterns.append(
             artifact_name_pattern(
                 category_name = unpacked[0],
@@ -257,8 +283,8 @@ def _impl_cc_toolchain_config(ctx):
         target_system_name = ctx.attr.target_name,
         target_cpu = ctx.attr.target_cpu,
 
-        features = features,
-        action_configs = action_configs,
+        features = features_all(ctx),
+        action_configs = action_configs_all(ctx),
 
         compiler = ctx.attr.compiler.get("name", "gcc"),
 
@@ -310,7 +336,7 @@ cc_toolchain_config = rule(
 
         'compiler': attr.string_dict(default = {}),
         'toolchain_bins': attr.label(mandatory = True, allow_files = True),
-        'extras_features': attr.string_list(default = [])
+        'extras_features': attr.string_list(default = []),
         'flags': attr.string_dict(),
         'cxx_builtin_include_directories': attr.string_list(),
 

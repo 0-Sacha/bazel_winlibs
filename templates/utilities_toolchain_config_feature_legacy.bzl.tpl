@@ -10,7 +10,7 @@ load(
     "variable_with_value",
     "with_feature_set",
 )
-load("//:utilities_action_names.bzl", "ACTIONS_COMPILE_ALL", "ACTIONS_LINK", "ACTIONS_LINK_LTO")
+load("//:utilities_action_names.bzl", "ACTIONS_COMPILE_ALL", "ACTIONS_LINK_ALL", "ACTIONS_LINK_LTO")
 
 def features_module_maps():
     """
@@ -77,7 +77,7 @@ def _legacy_user_compile_flags():
         enabled = True,
         flag_sets = [
             flag_set(
-                actions = all_compile_actions,
+                actions = ACTIONS_COMPILE_ALL,
                 flag_groups = [
                     flag_group(
                         flags = ["%{user_compile_flags}"],
@@ -94,14 +94,14 @@ def _legacy_user_link_flags():
         name = "user_link_flags",
         flag_sets = [
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         flags = ["%{user_link_flags}"],
                         iterate_over = "user_link_flags",
                         expand_if_available = "user_link_flags",
                     ),
-                ] + ([flag_group(flags = ctx.attr.link_libs)] if ctx.attr.link_libs else []),
+                ],
             ),
         ],
     )
@@ -111,7 +111,7 @@ def _legacy_library_search_directories():
         name = "library_search_directories",
         flag_sets = [
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         flags = ["-L%{library_search_directories}"],
@@ -150,7 +150,7 @@ def _legacy_symbol_counts():
         name = "symbol_counts",
         flag_sets = [
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         flags = [
@@ -189,7 +189,7 @@ def _legacy_sysroot():
         enabled = True,
         flag_sets = [
             flag_set(
-                actions = ACTIONS_COMPILE_ALL + ACTIONS_LINK + ACTIONS_LINK_LTO,
+                actions = ACTIONS_COMPILE_ALL + ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         flags = ["--sysroot=%{sysroot}"],
@@ -336,7 +336,7 @@ def _legacy_runtime_library_search_directories():
         name = "runtime_library_search_directories",
         flag_sets = [
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         iterate_over = "runtime_library_search_directories",
@@ -363,7 +363,7 @@ def _legacy_runtime_library_search_directories():
                 ],
             ),
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         iterate_over = "runtime_library_search_directories",
@@ -392,7 +392,7 @@ def _legacy_fission_support():
         name = "fission_support",
         flag_sets = [
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         flags = ["-Wl,--gdb-index"],
@@ -455,7 +455,7 @@ def _legacy_fdo_instrument():
                 actions = [
                     ACTION_NAMES.c_compile,
                     ACTION_NAMES.cpp_compile,
-                ] + all_link_actions + lto_index_actions,
+                ] + ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         flags = [
@@ -479,7 +479,7 @@ def _legacy_cs_fdo_instrument():
                     ACTION_NAMES.c_compile,
                     ACTION_NAMES.cpp_compile,
                     ACTION_NAMES.lto_backend,
-                ] + all_link_actions + lto_index_actions,
+                ] + ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         flags = [
@@ -551,7 +551,7 @@ def _legacy_llvm_coverage_map_format():
                 ],
             ),
             flag_set(
-                actions = all_link_actions + lto_index_actions + [
+                actions = ACTIONS_LINK_ALL + [
                     "objc-executable",
                     "objc++-executable",
                 ],
@@ -569,7 +569,7 @@ def _legacy_strip_debug_symbols():
         name = "strip_debug_symbols",
         flag_sets = [
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         flags = ["-Wl,-S"],
@@ -616,7 +616,7 @@ def _legacy_libraries_to_link():
         name = "libraries_to_link",
         flag_sets = [
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         iterate_over = "libraries_to_link",
@@ -729,7 +729,7 @@ def _legacy_linkstamps():
         name = "linkstamps",
         flag_sets = [
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         flags = ["%{linkstamp_paths}"],
@@ -764,7 +764,7 @@ def _legacy_gcc_coverage_map_format():
                 ],
             ),
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [flag_group(flags = ["--coverage"])],
             ),
         ],
@@ -892,42 +892,13 @@ def _legacy_output_execpath_flags():
         name = "output_execpath_flags",
         flag_sets = [
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(
                         flags = ["-o", "%{output_execpath}"],
                         expand_if_available = "output_execpath",
                     ),
                 ],
-            ),
-        ],
-    )
-
-# Note that we also set --coverage for c++-link-nodeps-dynamic-library. The
-# generated code contains references to gcov symbols, and the dynamic linker
-# can't resolve them unless the library is linked against gcov.
-def _legacy_coverage():
-    return feature(
-        name = "coverage",
-        provides = ["profile"],
-        flag_sets = [
-            flag_set(
-                actions = [
-                    ACTION_NAMES.preprocess_assemble,
-                    ACTION_NAMES.c_compile,
-                    ACTION_NAMES.cpp_compile,
-                    ACTION_NAMES.cpp_header_parsing,
-                    ACTION_NAMES.cpp_module_compile,
-                ],
-                flag_groups = ([
-                    flag_group(flags = ctx.attr.coverage_compile_flags),
-                ] if ctx.attr.coverage_compile_flags else []),
-            ),
-            flag_set(
-                actions = all_link_actions + lto_index_actions,
-                flag_groups = ([
-                    flag_group(flags = ctx.attr.coverage_link_flags),
-                ] if ctx.attr.coverage_link_flags else []),
             ),
         ],
     )
@@ -940,7 +911,7 @@ def _legacy_thinlto():
                 actions = [
                     ACTION_NAMES.c_compile,
                     ACTION_NAMES.cpp_compile,
-                ] + all_link_actions + lto_index_actions,
+                ] + ACTIONS_LINK_ALL,
                 flag_groups = [
                     flag_group(flags = ["-flto=thin"]),
                     flag_group(
@@ -957,7 +928,7 @@ def _legacy_thinlto():
                 flag_groups = [flag_group(flags = ["-DBUILD_LTO_TYPE=thin"])],
             ),
             flag_set(
-                actions = lto_index_actions,
+                actions = ACTIONS_LINK_LTO,
                 flag_groups = [
                     flag_group(flags = [
                         "-flto=thin",
@@ -1032,6 +1003,5 @@ def features_legacy():
     features.append(_legacy_dependency_file())
     features.append(_legacy_dynamic_library_linker_tool())
     features.append(_legacy_output_execpath_flags())
-    features.append(_legacy_coverage())
     features.append(_legacy_thinlto())
     return features
