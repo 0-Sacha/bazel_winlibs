@@ -112,7 +112,6 @@ def flags_unpack(flags_packed):
                 "with_features": with_features,
                 "flags": flag_flags
             }
-    print(flags_unpacked)
     return flags_unpacked
 
 def feature_common_flags(name, flags_unpacked, actions_lut, enabled = True, provides = []):
@@ -145,20 +144,22 @@ def feature_coverage(flags_unpacked):
     return feature_common_flags("coverage", flags_unpacked, ACTIONS_FEATURES_LUT_COV, provides = ["profile"])
 
 def feature_common_add(name, actions, flags, enabled = True):
-    return feature(
-        name = name,
-        enabled = enabled,
-        flag_sets = [
-            flag_set(
-                actions = actions,
-                flag_groups = [
-                    flag_group(
-                        flags = flags
-                    )
-                ]
-            )
-        ]
-    )
+    if len(flags) > 0:
+        return feature(
+            name = name,
+            enabled = enabled,
+            flag_sets = [
+                flag_set(
+                    actions = actions,
+                    flag_groups = [
+                        flag_group(
+                            flags = flags
+                        )
+                    ]
+                )
+            ]
+        )
+    return None
 
 def features_DIL(preprocessor_defines, include_directories, lib_directories):
     ""
@@ -224,7 +225,8 @@ def features_all(ctx):
     features.append(feature_default_link_flags(flags_unpacked))
     features.append(feature_coverage(flags_unpacked))
 
-    features.append(feature_link_libs("toolchain_libs", ctx.attr.toolchain_libs))
+    if len(ctx.attr.toolchain_libs) > 0:
+        features.append(feature_link_libs("toolchain_libs", ctx.attr.toolchain_libs))
     
     features += features_well_known(ctx)
     

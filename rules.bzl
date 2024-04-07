@@ -1,30 +1,17 @@
 ""
 
 load("@bazel_mingw//:archives.bzl", "MINGW_ARCHIVES_REGISTRY")
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-def get_host_infos_from_rctx(os_name, os_arch):
-    host_os = "linux"
-    host_arch = "x86_64"
-
-    if "windows" in os_name:
-        host_os = "windows"
-    elif "mac" in os_name:
-        host_os = "osx"
-
-    if "amd64" in os_arch:
-        host_arch = "x86_64"
-    elif "aarch64":
-        host_arch = "arm64"
-
-    return host_os, host_arch, "{}_{}".format(host_os, host_arch)
+load("@bazel_mingw//:utilities_hosts.bzl", "get_host_infos_from_rctx")
 
 def _mingw_impl(rctx):
     host_os, host_cpu, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
     target_name = rctx.attr.target_name if rctx.attr.target_name != "" else host_os
     target_cpu = rctx.attr.target_cpu if rctx.attr.target_name != "" else host_cpu
 
-    registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.version]
+    registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.mingw_version]
+
+    compiler_version = MINGW_ARCHIVES_REGISTRY[rctx.attr.mingw_version]["details"]["{}_version".format(rctx.attr.compiler)]
+    toolchain_id = "mingw_{}_{}".format(rctx.attr.compiler, compiler_version)
 
     constraints = []
     constraints += rctx.attr.target_compatible_with
@@ -40,19 +27,23 @@ def _mingw_impl(rctx):
         "%{target_cpu}": target_cpu,
         "%{toolchain_path_prefix}": "external/{}/".format(rctx.name),
         
-        "%{clang_id}": rctx.attr.clang_id,
-        "%{gcc_id}": rctx.attr.gcc_id,
-        "%{clang_version}": rctx.attr.clang_version,
-        "%{gcc_version}": rctx.attr.gcc_version,
+        "%{toolchain_id}": toolchain_id,
+        "%{clang_version}": registry["details"]["clang_version"],
+        "%{gcc_version}": registry["details"]["gcc_version"],
         
         "%{target_compatible_with_packed}": json.encode(constraints).replace("\"", "\\\""),
     }
     rctx.template(
         "BUILD",
-        Label("//templates:BUILD.tpl"),
+        Label("//templates:BUILD_{}.tpl".format(rctx.attr.compiler)),
         substitutions
     )
 
+    rctx.template(
+        "artifacts_patterns.bzl",
+        Label("//templates:artifacts_patterns.bzl.tpl"),
+        substitutions
+    )
     rctx.template(
         "utilities_action_names.bzl",
         Label("//templates:utilities_action_names.bzl.tpl"),
@@ -79,14 +70,11 @@ def _mingw_impl(rctx):
 
 _mingw_toolchain = repository_rule(
     attrs = {
-        'version': attr.string(default = "latest"),
+        'mingw_version': attr.string(default = "latest"),
+        'compiler': attr.string(mandatory = True),
+
         'target_name': attr.string(default = ""),
         'target_cpu': attr.string(default = ""),
-
-        'gcc_id': attr.string(mandatory = True),
-        'clang_id': attr.string(mandatory = True),
-        'gcc_version': attr.string(mandatory = True),
-        'clang_version': attr.string(mandatory = True),
 
         'use_host_constraint': attr.bool(default = False),
         'target_compatible_with': attr.string_list(default = []),
@@ -95,20 +83,14 @@ _mingw_toolchain = repository_rule(
     implementation = _mingw_impl,
 )
 
-def mingw_toolchain(name, version = "latest"):
+def mingw_toolchain(name, compiler = "gcc", mingw_version = "latest"):
     ""
-    registry = MINGW_ARCHIVES_REGISTRY[version]
-    gcc_id = "mingw_gcc_{}".format(registry["details"]["clang_version"])
-    clang_id = "mingw_clang_{}".format(registry["details"]["clang_version"])
-
     _mingw_toolchain(
         name = name,
-        version = version,
-        gcc_id = gcc_id,
-        gcc_version = registry["details"]["clang_version"],
-        clang_id = clang_id,
-        clang_version = registry["details"]["clang_version"],
+        mingw_version = mingw_version,
+        compiler = compiler,
         use_host_constraint = True
     )
 
-    native.register_toolchains("@{}//:toolchain_{}".format(name, clang_id))
+    compiler_version = MINGW_ARCHIVES_REGISTRY[mingw_version]["details"]["{}_version".format(compiler)]
+    native.register_toolchains("@{}//:toolchain_mingw_{}_{}".format(name, compiler, compiler_version))
