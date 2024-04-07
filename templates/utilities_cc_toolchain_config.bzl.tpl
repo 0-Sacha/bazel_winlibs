@@ -212,7 +212,7 @@ def features_all(ctx):
 def action_configs_all(ctx):
     action_configs = []
     action_configs += add_action_configs(
-        ctx.attr.toolchain_bins,
+        ctx.files.toolchain_bins,
         ctx.attr.compiler.get("cpp", ctx.attr.compiler.get("cxx", "gcc")),
         [
             ACTION_NAMES.cpp_compile,
@@ -223,7 +223,7 @@ def action_configs_all(ctx):
         ]
     )
     action_configs += add_action_configs(
-        ctx.attr.toolchain_bins,
+        ctx.files.toolchain_bins,
         ctx.attr.compiler.get("cc", "gcc"),
         [
             ACTION_NAMES.c_compile,
@@ -232,7 +232,7 @@ def action_configs_all(ctx):
         ]
     )
     action_configs += add_action_configs(
-        ctx.attr.toolchain_bins,
+        ctx.files.toolchain_bins,
         ctx.attr.compiler.get("cxx", "gcc"),
         [
             ACTION_NAMES.cpp_link_executable,
@@ -241,7 +241,7 @@ def action_configs_all(ctx):
         ]
     )
     action_configs += add_action_configs(
-        ctx.attr.toolchain_bins,
+        ctx.files.toolchain_bins,
         ctx.attr.compiler.get("ar", "ar"),
         [
             ACTION_NAMES.cpp_link_static_library
@@ -249,14 +249,14 @@ def action_configs_all(ctx):
         implies = [ "archiver_flags", "linker_param_file" ]
     )
     action_configs += add_action_configs(
-        ctx.attr.toolchain_bins,
+        ctx.files.toolchain_bins,
         ctx.attr.compiler.get("cov", "cov"),
         [
             ACTION_NAMES.llvm_cov
         ]
     )
     action_configs += add_action_configs(
-        ctx.attr.toolchain_bins,
+        ctx.files.toolchain_bins,
         ctx.attr.compiler.get("strip", "strip"),
         [
             ACTION_NAMES.strip

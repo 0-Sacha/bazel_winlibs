@@ -32,13 +32,13 @@ def _get_tool_path(bins, tool_name, base_name = "", extention = ""):
     print("Warrning: multiple Tool Found for {} !!. Keeping best : {}".format(tool_name, best))
     return best
     
-def add_action_configs(bins, tool_name, action_names, implies = []):
+def add_action_configs(toolchain_bins, tool_name, action_names, implies = []):
     action_configs = []
     for action_name in action_names:
         action_configs.append(
             action_config(
                 action_name = action_name,
-                tools = [ tool_path(name = tool_name, path = _get_tool_path(bins, tool_name)) ],
+                tools = [ tool_path(name = tool_name, path = _get_tool_path(toolchain_bins, tool_name)) ],
                 implies = implies
             )
         )
