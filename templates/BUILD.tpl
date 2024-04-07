@@ -19,7 +19,7 @@ cc_toolchain_config(
         "cxx": "clang++",
     },
     toolchain_bins = "//:compiler_components",
-    artifacts_patterns = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
+    artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
     flags = {
         "cpp_copts": "",
         "conly_copts": "",
