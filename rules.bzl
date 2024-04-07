@@ -18,13 +18,6 @@ def get_host_infos_from_rctx(os_name, os_arch):
 
 def _mingw_impl(rctx):
     host_os, host_cpu, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
-    registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.version]
-
-    base_id = rctx.attr.toolchain_identifier
-    if base_id == "":
-        base_id = "mingw_{}_{compiler_name}".format(host_name, compiler_name = "{}")
-
-    print("host_name {}".format(host_name))
 
     target_compatible_with = rctx.attr.target_compatible_with
     if rctx.attr.use_host_constraint:
@@ -37,10 +30,10 @@ def _mingw_impl(rctx):
         "%{toolchain_path_prefix}": "external/%s/" % rctx.name,
         "%{host_name}": host_name,
         
-        "%{clang_id}": base_id.format("clang_{}".format(registry["details"]["clang_version"])),
-        "%{clang_version}": registry["details"]["clang_version"],
-        "%{gcc_id}": base_id.format("gcc_{}".format(registry["details"]["gcc_version"])),
-        "%{gcc_version}": registry["details"]["gcc_version"],
+        "%{clang_id}": rctx.attr.clang_id,
+        "%{gcc_id}": rctx.attr.gcc_id,
+        "%{clang_version}": rctx.attr.clang_version,
+        "%{gcc_version}": rctx.attr.gcc_version,
         
         "%{target_compatible_with}": json.encode(target_compatible_with),
     }
@@ -77,7 +70,10 @@ def _mingw_impl(rctx):
 _mingw_toolchain = repository_rule(
     attrs = {
         'version': attr.string(default = "latest"),
-        'toolchain_identifier': attr.string(default = ""),
+        'gcc_id': attr.string(mandatory = True),
+        'clang_id': attr.string(mandatory = True),
+        'gcc_version': attr.string(mandatory = True),
+        'clang_version': attr.string(mandatory = True),
         'use_host_constraint': attr.bool(default = False),
         'target_compatible_with': attr.string_list(default = []),
     },
@@ -86,10 +82,16 @@ _mingw_toolchain = repository_rule(
 )
 
 def mingw_toolchain(name, version = "latest"):
-    toolchain_identifier = "mingw_{}"
+    gcc_id = "mingw_gcc_{}".format(registry["details"]["clang_version"])
+    clang_id = "mingw_clang_{}".format(registry["details"]["clang_version"])
+
     _mingw_toolchain(
         name = name,
         version = version,
-        toolchain_identifier = toolchain_identifier
+        gcc_id = gcc_id,
+        gcc_version = registry["details"]["clang_version"],
+        clang_id = clang_id,
+        clang_version = registry["details"]["clang_version"],
     )
-    native.register_toolchains("@{}//:toolchain_{}".format(name, toolchain_identifier.format("clang")))
+
+    native.register_toolchains("@{}//:toolchain_{}".format(name, clang_id))
