@@ -72,7 +72,7 @@ def _mingw_impl(rctx):
     )
 
     archive = registry["archives"][host_name]
-    rctx.download_and_extract(archive["url"], sha256 = archive["sha256"], stripPrefix = archive["prefix"])
+    rctx.download_and_extract(archive["url"], sha256 = archive["sha256"], stripPrefix = archive["strip_prefix"])
 
 _mingw_toolchain = repository_rule(
     attrs = {
