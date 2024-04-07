@@ -1,7 +1,23 @@
 load("@bazel_mingw//:archives.bzl", "MINGW_ARCHIVES_REGISTRY")
 
+def get_host_infos_from_rctx(os_name, os_arch):
+    host_os = "linux"
+    host_arch = "x86_64"
+
+    if "windows" in os_name:
+        host_os = "windows"
+    elif "mac" in os_name:
+        host_os = "osx"
+
+    if "amd64" in os_arch:
+        host_arch = "x86_64"
+    elif "aarch64":
+        host_arch = "arm64"
+
+    return host_os, host_arch, "{}_{}".format(host_os, host_arch)
+
 def _mingw_impl(rctx):
-    host_name = "{}_{}".format(rctx.os.name, rctx.os.arch)
+    host_os, host_cpu, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
     registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.version]
 
     base_id = rctx.attr.toolchain_identifier
@@ -13,8 +29,8 @@ def _mingw_impl(rctx):
     target_compatible_with = rctx.attr.target_compatible_with
     if rctx.attr.use_host_constraint:
         target_compatible_with += [
-            "@platforms//os:{}".format(rctx.os.name),
-            "@platforms//cpu:{}".format(rctx.os.arch)
+            "@platforms//os:{}".format(host_os),
+            "@platforms//cpu:{}".format(host_cpu)
         ]
 
     substitutions = {
