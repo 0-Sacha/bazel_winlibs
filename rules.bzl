@@ -92,4 +92,4 @@ def mingw_toolchain(name, version = "latest"):
         version = version,
         toolchain_identifier = toolchain_identifier
     )
-    native.register_toolchains("@{}//:mingw_{}".format(name, toolchain_identifier.format("clang")))
+    native.register_toolchains("@{}//:toolchain_{}".format(name, toolchain_identifier.format("clang")))
