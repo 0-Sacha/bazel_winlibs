@@ -83,7 +83,7 @@ _mingw_toolchain = repository_rule(
 )
 
 def mingw_toolchain(name, version = "latest"):
-    registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.version]
+    registry = MINGW_ARCHIVES_REGISTRY[version]
     gcc_id = "mingw_gcc_{}".format(registry["details"]["clang_version"])
     clang_id = "mingw_clang_{}".format(registry["details"]["clang_version"])
 
