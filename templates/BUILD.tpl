@@ -1,3 +1,6 @@
+""
+load("//:utilities_cc_toolchain_config.bzl", "cc_toolchain_config")
+
 package(default_visibility = ["//visibility:public"])
 
 MINGW_ATTIFACTS_PATTERNS = {
