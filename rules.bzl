@@ -1,7 +1,7 @@
 ""
 
 load("@bazel_mingw//:archives.bzl", "MINGW_ARCHIVES_REGISTRY")
-load("@bazel_mingw//:utilities_hosts.bzl", "get_host_infos_from_rctx")
+load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx")
 
 def _mingw_impl(rctx):
     host_os, host_cpu, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
@@ -38,30 +38,9 @@ def _mingw_impl(rctx):
         Label("//templates:BUILD_{}.tpl".format(rctx.attr.compiler)),
         substitutions
     )
-
     rctx.template(
         "artifacts_patterns.bzl",
         Label("//templates:artifacts_patterns.bzl.tpl"),
-        substitutions
-    )
-    rctx.template(
-        "utilities_action_names.bzl",
-        Label("//templates:utilities_action_names.bzl.tpl"),
-        substitutions
-    )
-    rctx.template(
-        "utilities_cc_toolchain_config.bzl",
-        Label("//templates:utilities_cc_toolchain_config.bzl.tpl"),
-        substitutions
-    )
-    rctx.template(
-        "utilities_config.bzl",
-        Label("//templates:utilities_config.bzl.tpl"),
-        substitutions
-    )
-    rctx.template(
-        "utilities_toolchain_config_feature_legacy.bzl",
-        Label("//templates:utilities_toolchain_config_feature_legacy.bzl.tpl"),
         substitutions
     )
 

@@ -1,6 +1,6 @@
 ""
 
-load("//:utilities_archives.bzl", "gen_archives_registry")
+load("@bazel_utilities//toolchains:archives.bzl", "gen_archives_registry")
 
 MINGW_ARCHIVES_13_2_0POSIX = {
     "version": "13.2.0posix",
