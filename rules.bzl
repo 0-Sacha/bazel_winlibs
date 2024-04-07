@@ -26,7 +26,7 @@ def _mingw_impl(rctx):
         "%{gcc_id}": base_id.format("gcc_{}".format(registry["details"]["gcc_version"])),
         "%{gcc_version}": registry["details"]["gcc_version"],
         
-        "%{target_compatible_with}": target_compatible_with,
+        "%{target_compatible_with}": json.encode(target_compatible_with),
     }
     rctx.template(
         "BUILD",

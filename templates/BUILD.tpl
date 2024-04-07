@@ -53,7 +53,7 @@ toolchain(
     toolchain = "cc_toolchain_%{toolchain_identifier}",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 
-    target_compatible_with = %{target_compatible_with},
+    target_compatible_with = json.decode("%{target_compatible_with}"),
 )
 
 # gcc executables.
