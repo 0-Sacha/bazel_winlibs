@@ -21,10 +21,10 @@ def _mingw_impl(rctx):
         "%{toolchain_path_prefix}": "external/%s/" % rctx.name,
         "%{host_name}": host_name,
         
-        "%{clang_id}": base_id.format("clang_{}".format(registry["detail"]["clang_version"])),
-        "%{clang_version}": registry["detail"]["clang_version"],
-        "%{gcc_id}": base_id.format("gcc_{}".format(registry["detail"]["gcc_version"])),
-        "%{gcc_version}": registry["detail"]["gcc_version"],
+        "%{clang_id}": base_id.format("clang_{}".format(registry["details"]["clang_version"])),
+        "%{clang_version}": registry["details"]["clang_version"],
+        "%{gcc_id}": base_id.format("gcc_{}".format(registry["details"]["gcc_version"])),
+        "%{gcc_version}": registry["details"]["gcc_version"],
         
         "%{target_compatible_with}": target_compatible_with,
     }
