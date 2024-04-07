@@ -26,9 +26,10 @@ def _mingw_impl(rctx):
 
     registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.version]
 
-    target_compatible_with = rctx.attr.target_compatible_with
+    constraints = []
+    constraints += rctx.attr.target_compatible_with
     if rctx.attr.use_host_constraint:
-        target_compatible_with += [
+        constraints += [
             "@platforms//os:{}".format(host_os),
             "@platforms//cpu:{}".format(host_cpu)
         ]
@@ -44,7 +45,7 @@ def _mingw_impl(rctx):
         "%{clang_version}": rctx.attr.clang_version,
         "%{gcc_version}": rctx.attr.gcc_version,
         
-        "%{target_compatible_with}": json.encode(target_compatible_with),
+        "%{target_compatible_with_packed}": json.encode(constraints).replace("\"", "\\\""),
     }
     rctx.template(
         "BUILD",
@@ -107,6 +108,7 @@ def mingw_toolchain(name, version = "latest"):
         gcc_version = registry["details"]["clang_version"],
         clang_id = clang_id,
         clang_version = registry["details"]["clang_version"],
+        use_host_constraint = True
     )
 
     native.register_toolchains("@{}//:toolchain_{}".format(name, clang_id))

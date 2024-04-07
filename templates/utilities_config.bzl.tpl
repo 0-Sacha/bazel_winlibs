@@ -1,6 +1,6 @@
 ""
 
-load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl", "tool_path", "action_config")
+load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl", "tool", "tool_path", "action_config")
 
 def _best_match(matchs):
     smallest = matchs[0]
@@ -40,10 +40,11 @@ def add_action_configs(toolchain_bins, tool_name, action_names, implies = []):
         path = _get_tool_file(toolchain_bins, tool_name)
         if path == None:
             continue
+        path = path.path
         action_configs.append(
             action_config(
                 action_name = action_name,
-                tools = [ tool_path(name = tool_name, path = path) ],
+                tools = [ tool(path = path) ],
                 implies = implies
             )
         )
