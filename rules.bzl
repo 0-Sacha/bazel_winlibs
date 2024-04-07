@@ -21,6 +21,9 @@ def get_host_infos_from_rctx(os_name, os_arch):
 
 def _mingw_impl(rctx):
     host_os, host_cpu, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
+    target_name = rctx.attr.target_name if rctx.attr.target_name != "" else host_os
+    target_cpu = rctx.attr.target_cpu if rctx.attr.target_name != "" else host_cpu
+
     registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.version]
 
     target_compatible_with = rctx.attr.target_compatible_with
@@ -32,6 +35,8 @@ def _mingw_impl(rctx):
 
     substitutions = {
         "%{host_name}": host_name,
+        "%{target_name}": target_name,
+        "%{target_cpu}": target_cpu,
         "%{toolchain_path_prefix}": "external/{}/".format(rctx.name),
         
         "%{clang_id}": rctx.attr.clang_id,
@@ -74,10 +79,14 @@ def _mingw_impl(rctx):
 _mingw_toolchain = repository_rule(
     attrs = {
         'version': attr.string(default = "latest"),
+        'target_name': attr.string(default = ""),
+        'target_cpu': attr.string(default = ""),
+
         'gcc_id': attr.string(mandatory = True),
         'clang_id': attr.string(mandatory = True),
         'gcc_version': attr.string(mandatory = True),
         'clang_version': attr.string(mandatory = True),
+
         'use_host_constraint': attr.bool(default = False),
         'target_compatible_with': attr.string_list(default = []),
     },

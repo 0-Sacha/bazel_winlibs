@@ -18,7 +18,7 @@ cc_toolchain_config(
         "cc": "clang",
         "cxx": "clang++",
     },
-    toolchain_bins = "@%{archive_name}//:compiler_components",
+    toolchain_bins = "//:compiler_components",
     artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
     flags = {
         "cpp_copts": "",
@@ -41,13 +41,13 @@ cc_toolchain(
     toolchain_identifier = "%{clang_id}",
     toolchain_config = "cc_toolchain_config_%{clang_id}",
     
-    all_files = "@%{archive_name}//:all_files",
-    ar_files = "@%{archive_name}//:ar",
-    compiler_files = "@%{archive_name}//:compiler_files",
-    dwp_files = "@%{archive_name}//:dwp",
-    linker_files = "@%{archive_name}//:linker_files",
-    objcopy_files = "@%{archive_name}//:objcopy",
-    strip_files = "@%{archive_name}//:strip",
+    all_files = "//:all_files",
+    ar_files = "//:ar",
+    compiler_files = "//:compiler_files",
+    dwp_files = "//:dwp",
+    linker_files = "//:linker_files",
+    objcopy_files = "//:objcopy",
+    strip_files = "//:strip",
     supports_param_files = 0
 )
 
