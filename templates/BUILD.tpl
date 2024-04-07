@@ -7,58 +7,6 @@ MINGW_ATTIFACTS_PATTERNS = {
     "windows_x86_64": "executable//.exe"
 }
 
-cc_toolchain_config(
-    name = "cc_toolchain_config_%{clang_id}",
-    toolchain_identifier = "%{clang_id}",
-    host_name = "%{host_name}",
-    target_name = "%{target_name}",
-    target_cpu = "%{target_cpu}",
-    compiler = {
-        "name": "clang",
-        "cc": "clang",
-        "cxx": "clang++",
-    },
-    toolchain_bins = "//:compiler_components",
-    artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
-    flags = {
-        "cpp_copts": "",
-        "conly_copts": "",
-        "cxx_copts":  "",
-        "link_copts":  ""
-    },
-    cxx_builtin_include_directories = [
-        "external/mingw_%{host_name}/include",
-        "external/mingw_%{host_name}/x86_64-w64-mingw32/include",
-        "external/mingw_%{host_name}/lib/clang/%{clang_version}/include",
-    ],
-    lib_directories = [
-        "external/mingw_{host_name}/x86_64-w64-mingw32/lib",
-    ]
-)
-
-cc_toolchain(
-    name = "cc_toolchain_%{clang_id}",
-    toolchain_identifier = "%{clang_id}",
-    toolchain_config = "cc_toolchain_config_%{clang_id}",
-    
-    all_files = "//:all_files",
-    ar_files = "//:ar",
-    compiler_files = "//:compiler_files",
-    dwp_files = "//:dwp",
-    linker_files = "//:linker_files",
-    objcopy_files = "//:objcopy",
-    strip_files = "//:strip",
-    supports_param_files = 0
-)
-
-toolchain(
-    name = "toolchain_%{clang_id}",
-    toolchain = "cc_toolchain_%{clang_id}",
-    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
-
-    target_compatible_with = json.decode("%{target_compatible_with}"),
-)
-
 # gcc executables.
 filegroup(
     name = "gcc",
@@ -205,4 +153,56 @@ filegroup(
         ":objdump",
         ":strip",
     ],
+)
+
+cc_toolchain_config(
+    name = "cc_toolchain_config_%{clang_id}",
+    toolchain_identifier = "%{clang_id}",
+    host_name = "%{host_name}",
+    target_name = "%{target_name}",
+    target_cpu = "%{target_cpu}",
+    compiler = {
+        "name": "clang",
+        "cc": "clang",
+        "cxx": "clang++",
+    },
+    toolchain_bins = "//:compiler_components",
+    artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
+    flags = {
+        "cpp_copts": "",
+        "conly_copts": "",
+        "cxx_copts":  "",
+        "link_copts":  ""
+    },
+    cxx_builtin_include_directories = [
+        "external/mingw_%{host_name}/include",
+        "external/mingw_%{host_name}/x86_64-w64-mingw32/include",
+        "external/mingw_%{host_name}/lib/clang/%{clang_version}/include",
+    ],
+    lib_directories = [
+        "external/mingw_{host_name}/x86_64-w64-mingw32/lib",
+    ]
+)
+
+cc_toolchain(
+    name = "cc_toolchain_%{clang_id}",
+    toolchain_identifier = "%{clang_id}",
+    toolchain_config = "cc_toolchain_config_%{clang_id}",
+    
+    all_files = "//:all_files",
+    ar_files = "//:ar",
+    compiler_files = "//:compiler_files",
+    dwp_files = "//:dwp",
+    linker_files = "//:linker_files",
+    objcopy_files = "//:objcopy",
+    strip_files = "//:strip",
+    supports_param_files = 0
+)
+
+toolchain(
+    name = "toolchain_%{clang_id}",
+    toolchain = "cc_toolchain_%{clang_id}",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+
+    target_compatible_with = json.decode("%{target_compatible_with}"),
 )
