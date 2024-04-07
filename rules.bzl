@@ -18,6 +18,7 @@ def get_host_infos_from_rctx(os_name, os_arch):
 
 def _mingw_impl(rctx):
     host_os, host_cpu, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
+    registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.version]
 
     target_compatible_with = rctx.attr.target_compatible_with
     if rctx.attr.use_host_constraint:
@@ -82,6 +83,7 @@ _mingw_toolchain = repository_rule(
 )
 
 def mingw_toolchain(name, version = "latest"):
+    registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.version]
     gcc_id = "mingw_gcc_{}".format(registry["details"]["clang_version"])
     clang_id = "mingw_clang_{}".format(registry["details"]["clang_version"])
 
