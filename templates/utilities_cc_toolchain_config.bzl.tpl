@@ -72,22 +72,23 @@ def features_flags(flags):
         else:
             patterns[1] = patterns[1].split(";")
         
-        features.append(
-            feature(
-                name = "flags_{}".format(filter_name),
-                enabled = True,
-                flag_sets = [
-                    flag_set(
-                        actions = ACTIONS_FEATURES_LUT[patterns[0]],
-                        flag_groups = ([
-                            flag_group(
-                                flags = flags,
-                            ),
-                        ]),
-                    )],
-                with_features = [with_feature_set(features = patterns[1])],
+        if len(flags) > 0:
+            features.append(
+                feature(
+                    name = "flags_{}".format(filter_name),
+                    enabled = True,
+                    flag_sets = [
+                        flag_set(
+                            actions = ACTIONS_FEATURES_LUT[patterns[0]],
+                            flag_groups = [
+                                flag_group(
+                                    flags = flags
+                                ),
+                            ],
+                        )],
+                    with_features = [with_feature_set(features = patterns[1])],
+                )
             )
-        )
     return features
 
 def features_DIL(preprocessor_defines, include_directories, lib_directories):
@@ -95,54 +96,57 @@ def features_DIL(preprocessor_defines, include_directories, lib_directories):
     all_defines = [ "-D{}".format(define) for define in preprocessor_defines ]
     all_includedirs = [ "-I{}".format(includedir) for includedir in include_directories]
     all_linkdirs = [ "-L{}".format(linkdir) for linkdir in lib_directories]
-    features.append(
-        feature(
-            name = "toolchain_config_defines",
-            enabled = True,
-            flag_sets = [
-                flag_set(
-                    actions = ACTIONS_COMPILE_ALL,
-                    flag_groups = [
-                        flag_group(
-                            flags = all_defines
-                        ),
-                    ],
-                ),
-            ],
+    if len(all_defines) > 0:
+        features.append(
+            feature(
+                name = "toolchain_config_defines",
+                enabled = True,
+                flag_sets = [
+                    flag_set(
+                        actions = ACTIONS_COMPILE_ALL,
+                        flag_groups = [
+                            flag_group(
+                                flags = all_defines
+                            ),
+                        ],
+                    ),
+                ],
+            )
         )
-    )
-    features.append(
-        feature(
-            name = "toolchain_config_includes",
-            enabled = True,
-            flag_sets = [
-                flag_set(
-                    actions = ACTIONS_COMPILE_ALL,
-                    flag_groups = [
-                        flag_group(
-                            flags = all_includedirs
-                        ),
-                    ],
-                ),
-            ],
+    if len(all_includedirs) > 0:
+        features.append(
+            feature(
+                name = "toolchain_config_includes",
+                enabled = True,
+                flag_sets = [
+                    flag_set(
+                        actions = ACTIONS_COMPILE_ALL,
+                        flag_groups = [
+                            flag_group(
+                                flags = all_includedirs
+                            ),
+                        ],
+                    ),
+                ],
+            )
         )
-    )
-    features.append(
-        feature(
-            name = "toolchain_config_link",
-            enabled = True,
-            flag_sets = [
-                flag_set(
-                    actions = ACTIONS_LINK_ALL,
-                    flag_groups = [
-                        flag_group(
-                            flags = all_linkdirs
-                        ),
-                    ],
-                ),
-            ],
+    if len(all_linkdirs) > 0:
+        features.append(
+            feature(
+                name = "toolchain_config_link",
+                enabled = True,
+                flag_sets = [
+                    flag_set(
+                        actions = ACTIONS_LINK_ALL,
+                        flag_groups = [
+                            flag_group(
+                                flags = all_linkdirs
+                            ),
+                        ],
+                    ),
+                ],
+            )
         )
-    )
     return features
 
 # Note that we also set --coverage for c++-link-nodeps-dynamic-library. The
