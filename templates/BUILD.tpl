@@ -18,16 +18,16 @@ cc_toolchain_config(
     toolchain_bins = "//:compiler_components",
     artifacts_patterns = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
     flags = {
-        "cpp_copts": ""
-        "conly_copts": 
-        "cxx_copts": 
-        "link_copts": 
+        "cpp_copts": "",
+        "conly_copts": "",
+        "cxx_copts":  "",
+        "link_copts":  ""
     },
     cxx_builtin_include_directories = [
         "external/mingw_%{host_name}/include",
         "external/mingw_%{host_name}/x86_64-w64-mingw32/include",
         "external/mingw_%{host_name}/lib/clang/%{clang_version}/include",
-    ]
+    ],
     lib_directories = [
         "external/mingw_{host_name}/x86_64-w64-mingw32/lib",
     ]
