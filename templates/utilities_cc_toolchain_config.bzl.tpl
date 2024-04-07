@@ -61,7 +61,7 @@ ACTIONS_FEATURES_LUT_COV = {
 
 def flags_unpack(flags_packed):
     ""
-    flags_unpacked = {}
+    flags_unpacked = []
     for flag_type, flag_flags in flags_packed.items():
         # filters name and json mode
         if flag_type.startswith('$'):
@@ -71,7 +71,6 @@ def flags_unpack(flags_packed):
             flag_flags = flag_flags.split(';')
             flag_type = flag_type[1:]
         
-        filter_name = flag_type
         if flag_type.startswith('%'):
             flag_type = flag_type[flag_type.find('%') + 1:]
         
@@ -80,7 +79,7 @@ def flags_unpack(flags_packed):
         if patterns[0].startswith('$'):
             patterns[0] = patterns[0][1:]
             flag_types = json.decode(patterns[0])
-        elif patterns[0].startswith('#') == False:
+        elif patterns[0].startswith('#'):
             patterns[0] = patterns[0][1:]
             flag_types = patterns[0].split(';')
         else:
@@ -107,17 +106,17 @@ def flags_unpack(flags_packed):
                     with_features.append(with_feature_set(features = f_with, not_features = f_without))
 
         for flag_type in flag_types:
-            flags_unpacked[filter_name] = {
+            flags_unpacked.append({
                 "type": flag_type,
                 "with_features": with_features,
                 "flags": flag_flags
-            }
+            })
     return flags_unpacked
 
 def feature_common_flags(name, flags_unpacked, actions_lut, enabled = True, provides = []):
     ""
     flag_sets = []
-    for _, flag_data in flags_unpacked.items():
+    for flag_data in flags_unpacked.items():
         if len(flag_data["flags"]) > 0 and flag_data["type"] in actions_lut:
             flag_sets.append(
                 flag_set(
