@@ -34,163 +34,164 @@ load("//:utilities_action_names.bzl",
     "ACTIONS_COMPILE_CXX",
     "ACTIONS_LINK",
     "ACTIONS_LINK_LTO",
-    "ACTIONS_LINK_ALL"
+    "ACTIONS_LINK_ALL",
+    "ACTIONS_COV_ALL",
+    "ACTIONS_COV_COMPILE",
+    "ACTIONS_COV_LINK",
 )
 load("//:utilities_config.bzl", "add_action_configs", "register_tools")
 load("//:utilities_toolchain_config_feature_legacy.bzl", "features_module_maps", "features_legacy")
 
-ACTIONS_FEATURES_LUT = {
-    "all": ACTIONS_COMPILE_ALL,
-
-    "cpp_copts": ACTIONS_COMPILE_CPP,
-    "conly_copts": ACTIONS_COMPILE_C,
-    "cxx_copts": ACTIONS_COMPILE_CXX,
-    "copts": ACTIONS_COMPILE_CPP + ACTIONS_COMPILE_C + ACTIONS_COMPILE_CXX,
-    
-    "link_copts": ACTIONS_LINK + ACTIONS_LINK_LTO
+ACTIONS_FEATURES_LUT_COMPILE = {
+    "copts": ACTIONS_COMPILE_ALL,
+    "cppcopts": ACTIONS_COMPILE_CPP,
+    "conlycopts": ACTIONS_COMPILE_C,
+    "cxxcopts": ACTIONS_COMPILE_CXX,
 }
 
-def features_flags(flags):
-    features = []
-    for flags_pattern, flags in flags.items():
+ACTIONS_FEATURES_LUT_LINK = {
+    "linkopts": ACTIONS_LINK + ACTIONS_LINK_LTO
+}
+
+ACTIONS_FEATURES_LUT_COV = {
+    "cov": ACTIONS_COV_ALL,
+    "ccov": ACTIONS_COV_COMPILE,
+    "lcov": ACTIONS_COV_LINK
+}
+
+def flags_unpack(flags_packed):
+    flags_unpacked = {}
+    for flag_type, flag_flags in flags_packed.items():
         # filters name and json mode
-        if flags_pattern.startswith('$'):
-            flags = json.decode(flags)
-            flags_pattern = flags_pattern[1:]
-        elif flags_pattern.startswith('#'):
-            flags = flags.split(';')
-            flags_pattern = flags_pattern[1:]
+        if flag_type.startswith('$'):
+            flag_flags = json.decode(flag_flags)
+            flag_type = flag_type[1:]
+        elif flag_type.startswith('#'):
+            flag_flags = flag_flags.split(';')
+            flag_type = flag_type[1:]
         
-        filter_name = flags_pattern
-        if flags_pattern.startswith('%'):
-            flags_pattern = flags_pattern[flags_pattern.find('%') + 1:]
+        if flag_type.startswith('%'):
+        filter_name = flag_type
+            flag_type = flag_type[flag_type.find('%') + 1:]
         
-        # features restrictions on flags
-        patterns = flags_pattern.split('/')
-        if len(patterns) == 1:
-            patterns.append([])
-        else:
-            patterns[1] = patterns[1].split(";")
-        
-        if len(flags) > 0:
-            features.append(
-                feature(
-                    name = "flags_{}".format(filter_name),
-                    enabled = True,
-                    flag_sets = [
-                        flag_set(
-                            actions = ACTIONS_FEATURES_LUT[patterns[0]],
-                            flag_groups = [
-                                flag_group(
-                                    flags = flags
-                                ),
-                            ],
-                        )],
-                    with_features = [with_feature_set(features = patterns[1])],
+        patterns = flag_type.split('/')
+        flag_type = patterns[0]
+        with_features = []
+        if len(patterns) > 1:
+            features_filters = patterns[1].split(';')
+            for filter in features_filters
+                if filter.startswith('[') == False:
+                    if filter.startswith('!')
+                        with_features.append(with_feature_set(not_features = [filter]))
+                    else:
+                        with_features.append(with_feature_set(features = [filter]))
+                else:
+                    filters = json.decode(filter)
+                    for subfilter in filters:
+                        f_with = []
+                        f_without = []
+                        if subfilter.startswith('!')
+                            f_without.append(subfilter)
+                        else:
+                            f_with.append(subfilter)
+                    with_features.append(with_feature_set(features = f_with, not_features = f_without))
+
+        flags_unpacked[filter_name] = {
+            "type": flag_type,
+            "with_features": with_features,
+            "flags": flag_flags
+        }
+    return flags
+
+def feature_common_flags(name, flags_unpacked, actions_lut, enabled = True, provides = []):
+    ""
+    flag_sets = []
+    for _, flag_data in flags_unpacked.items():
+        if len(flag_data["flags"]) > 0 and flag_data["type"] in actions_lut:
+            flag_sets.append(
+                flag_set(
+                    actions = actions_lut[flag_data["type"]],
+                    flag_groups = [ flag_group( flags = flag_data["flags"]) ],
+                    with_features = flag_data["with_features"],
                 )
             )
-    return features
+    _feature = feature(
+        name = name,
+        provides = provides,
+        enabled = enabled,
+        flag_sets = flag_sets,
+    )
+    return _feature
+
+def feature_default_compile_flags(flags_unpacked):
+    return feature_common_flags("default_compile_flags", flags_unpacked, ACTIONS_FEATURES_LUT_COMPILE)
+
+def feature_default_link_flags(flags_unpacked):
+    return feature_common_flags("default_link_flags", flags_unpacked, ACTIONS_FEATURES_LUT_LINK)
+
+def feature_coverage(flags_unpacked):
+    return feature_common_flags("coverage", flags_unpacked, ACTIONS_FEATURES_LUT_COV, provides = ["profile"])
+
+def feature_common_add(name, actions, flags, enabled = True):
+    return feature(
+        name = name,
+        enabled = enabled,
+        flag_sets = [
+            flag_set(
+                actions = actions,
+                flag_groups = [
+                    flag_group(
+                        flags = flags
+                    ),
+                ],
+            ),
+        ],
+    )
 
 def features_DIL(preprocessor_defines, include_directories, lib_directories):
+    ""
     features = []
     all_defines = [ "-D{}".format(define) for define in preprocessor_defines ]
     all_includedirs = [ "-I{}".format(includedir) for includedir in include_directories]
     all_linkdirs = [ "-L{}".format(linkdir) for linkdir in lib_directories]
     if len(all_defines) > 0:
         features.append(
-            feature(
+            feature_common_add(
                 name = "toolchain_config_defines",
-                enabled = True,
-                flag_sets = [
-                    flag_set(
-                        actions = ACTIONS_COMPILE_ALL,
-                        flag_groups = [
-                            flag_group(
-                                flags = all_defines
-                            ),
-                        ],
-                    ),
-                ],
+                actions = ACTIONS_COMPILE_ALL,
+                flags = all_defines
             )
         )
     if len(all_includedirs) > 0:
         features.append(
-            feature(
-                name = "toolchain_config_includes",
-                enabled = True,
-                flag_sets = [
-                    flag_set(
-                        actions = ACTIONS_COMPILE_ALL,
-                        flag_groups = [
-                            flag_group(
-                                flags = all_includedirs
-                            ),
-                        ],
-                    ),
-                ],
+            feature_common_add(
+                name = "toolchain_config_link",
+                actions = ACTIONS_COMPILE_ALL,
+                flags = all_includedirs
             )
         )
     if len(all_linkdirs) > 0:
         features.append(
-            feature(
+            feature_common_add(
                 name = "toolchain_config_link",
-                enabled = True,
-                flag_sets = [
-                    flag_set(
-                        actions = ACTIONS_LINK_ALL,
-                        flag_groups = [
-                            flag_group(
-                                flags = all_linkdirs
-                            ),
-                        ],
-                    ),
-                ],
+                actions = ACTIONS_LINK_ALL,
+                flags = all_linkdirs
             )
         )
     return features
 
-# Note that we also set --coverage for c++-link-nodeps-dynamic-library. The
-# generated code contains references to gcov symbols, and the dynamic linker
-# can't resolve them unless the library is linked against gcov.
-def feature_coverage(ctx):
-    return feature(
-        name = "coverage",
-        provides = ["profile"],
-        flag_sets = [
-            flag_set(
-                actions = [
-                    ACTION_NAMES.preprocess_assemble,
-                    ACTION_NAMES.c_compile,
-                    ACTION_NAMES.cpp_compile,
-                    ACTION_NAMES.cpp_header_parsing,
-                    ACTION_NAMES.cpp_module_compile,
-                ],
-                flag_groups = ([
-                    flag_group(flags = ctx.attr.coverage_compile_flags),
-                ] if ctx.attr.coverage_compile_flags else []),
-            ),
-            flag_set(
-                actions = ACTIONS_LINK_ALL,
-                flag_groups = ([
-                    flag_group(flags = ctx.attr.coverage_link_flags),
-                ] if ctx.attr.coverage_link_flags else []),
-            ),
-        ],
-    )
-
 def features_well_known(ctx):
+    ""
     features = []
-    
     features.append(feature(name = "supports_pic", enabled = True))
     features.append(feature(name = "supports_dynamic_linker", enabled = True))
     if "supports_start_end_lib" in ctx.attr.enable_features:
         features.append(feature(name = "supports_start_end_lib", enabled = True))
-
     return features
 
 def features_all(ctx):
+    ""
     features = []
-
     features.append(feature(name = "dbg"))
     features.append(feature(name = "opt"))
     features.append(feature(name = "fastbuild"))
@@ -198,7 +199,11 @@ def features_all(ctx):
     for extra_feature in ctx.attr.extras_features:
         features.append(feature(name = extra_feature))
 
-    features += features_flags(ctx.attr.flags)
+    flags_unpacked = flags_unpack(ctx.attr.flags)
+    features += feature_default_compile_flags(flags_unpacked)
+    features += feature_default_link_flags(flags_unpacked)
+    features += feature_coverage(flags_unpacked)
+    
     features += features_well_known(ctx)
     
     features += features_DIL(
@@ -206,10 +211,10 @@ def features_all(ctx):
         ctx.attr.include_directories + (ctx.attr.cxx_builtin_include_directories if ctx.attr.include_directories_use_builtin else []),
         ctx.attr.lib_directories
     )
-    
     return features
 
 def action_configs_all(ctx):
+    ""
     action_configs = []
     action_configs += add_action_configs(
         ctx.files.toolchain_bins,
@@ -265,6 +270,7 @@ def action_configs_all(ctx):
     return action_configs
 
 def get_artifacts_patterns(artifacts_patterns_packed):
+    ""
     artifacts_patterns_categories = artifacts_patterns_packed.split(',')
     patterns = []
     for category in artifacts_patterns_categories:

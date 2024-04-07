@@ -55,3 +55,13 @@ ACTIONS_LINK_LTO = [
 ]
 
 ACTIONS_LINK_ALL = ACTIONS_LINK + ACTIONS_LINK_LTO
+
+ACTIONS_COV_COMPILE = [
+    ACTION_NAMES.lto_index_for_executable,
+    ACTION_NAMES.lto_index_for_dynamic_library,
+    ACTION_NAMES.lto_index_for_nodeps_dynamic_library,
+]
+
+ACTIONS_COV_LINK = ACTIONS_LINK_ALL
+
+ACTIONS_COV_ALL = ACTIONS_COV_COMPILE + ACTIONS_COV_LINK

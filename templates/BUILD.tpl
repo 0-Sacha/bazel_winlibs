@@ -21,10 +21,11 @@ cc_toolchain_config(
     toolchain_bins = "//:compiler_components",
     artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
     flags = {
-        "cpp_copts": "",
-        "conly_copts": "",
-        "cxx_copts":  "",
-        "link_copts":  ""
+        "copts": "",
+        "cppcopts": "",
+        "conlycopts": "",
+        "cxxcopts":  "",
+        "linkcopts":  ""
     },
     cxx_builtin_include_directories = [
         "%{toolchain_path_prefix}include",
