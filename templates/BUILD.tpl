@@ -63,6 +63,57 @@ toolchain(
     target_compatible_with = json.decode("%{target_compatible_with_packed}"),
 )
 
+cc_toolchain_config(
+    name = "cc_toolchain_config_%{gcc_id}",
+    toolchain_identifier = "%{gcc_id}",
+    host_name = "%{host_name}",
+    target_name = "%{target_name}",
+    target_cpu = "%{target_cpu}",
+    compiler = {
+        "name": "gcc",
+        "cc": "gcc",
+        "cxx": "g++",
+    },
+    toolchain_bins = "//:compiler_components",
+    artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
+    flags = {
+        "##linkcopts;copts":  "-no-canonical-prefixes;-fno-canonical-system-headers"
+    },
+    cxx_builtin_include_directories = [
+        "%{toolchain_path_prefix}include",
+        "%{toolchain_path_prefix}x86_64-w64-mingw32/include",
+        "%{toolchain_path_prefix}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include",
+        "%{toolchain_path_prefix}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include-fixed"
+    ],
+    lib_directories = [
+        "%{toolchain_path_prefix}x86_64-w64-mingw32/lib",
+        "%{toolchain_path_prefix}lib/gcc/x86_64-w64-mingw32/{gcc_version}",
+    ]
+)
+
+cc_toolchain(
+    name = "cc_toolchain_%{gcc_id}",
+    toolchain_identifier = "%{gcc_id}",
+    toolchain_config = "cc_toolchain_config_%{gcc_id}",
+    
+    all_files = "//:all_files",
+    ar_files = "//:ar",
+    compiler_files = "//:compiler_files",
+    dwp_files = "//:dwp",
+    linker_files = "//:linker_files",
+    objcopy_files = "//:objcopy",
+    strip_files = "//:strip",
+    supports_param_files = 0
+)
+
+toolchain(
+    name = "toolchain_%{gcc_id}",
+    toolchain = "cc_toolchain_%{gcc_id}",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+
+    target_compatible_with = json.decode("%{target_compatible_with_packed}"),
+)
+
 # gcc executables.
 filegroup(
     name = "gcc",
