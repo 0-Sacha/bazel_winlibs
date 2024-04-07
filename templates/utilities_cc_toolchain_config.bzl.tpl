@@ -213,7 +213,7 @@ def action_configs_all(ctx):
     action_configs = []
     action_configs += add_action_configs(
         ctx.files.toolchain_bins,
-        ctx.attr.compiler.get("cpp", ctx.attr.compiler.get("cxx", "gcc")),
+        ctx.attr.compiler.get("cpp", ctx.attr.compiler.get("cxx", "g++")),
         [
             ACTION_NAMES.cpp_compile,
             ACTION_NAMES.cpp_header_parsing,
@@ -233,7 +233,7 @@ def action_configs_all(ctx):
     )
     action_configs += add_action_configs(
         ctx.files.toolchain_bins,
-        ctx.attr.compiler.get("cxx", "gcc"),
+        ctx.attr.compiler.get("cxx", "g++"),
         [
             ACTION_NAMES.cpp_link_executable,
             ACTION_NAMES.cpp_link_dynamic_library,
@@ -250,7 +250,7 @@ def action_configs_all(ctx):
     )
     action_configs += add_action_configs(
         ctx.files.toolchain_bins,
-        ctx.attr.compiler.get("cov", "cov"),
+        ctx.attr.compiler.get("cov", "gcov"),
         [
             ACTION_NAMES.llvm_cov
         ]

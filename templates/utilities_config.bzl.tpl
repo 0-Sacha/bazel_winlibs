@@ -9,7 +9,7 @@ def _best_match(matchs):
             smallest = match
     return smallest
 
-def _get_tool_path(bins, tool_name, base_name = "", extention = ""):
+def _get_tool_file(bins, tool_name, base_name = "", extention = ""):
     matchs = []
     tool_fullname = "{}{}{}".format(base_name, tool_name, extention)
     tool_fullname_woext = "{}{}".format(base_name, tool_name)
@@ -33,12 +33,17 @@ def _get_tool_path(bins, tool_name, base_name = "", extention = ""):
     return best
     
 def add_action_configs(toolchain_bins, tool_name, action_names, implies = []):
+    if tool_name == "":
+        return None
     action_configs = []
     for action_name in action_names:
+        path = _get_tool_file(toolchain_bins, tool_name)
+        if path == None:
+            continue
         action_configs.append(
             action_config(
                 action_name = action_name,
-                tools = [ tool_path(name = tool_name, path = _get_tool_path(toolchain_bins, tool_name)) ],
+                tools = [ tool_path(name = tool_name, path = path) ],
                 implies = implies
             )
         )

@@ -1,4 +1,7 @@
+""
+
 load("@bazel_mingw//:archives.bzl", "MINGW_ARCHIVES_REGISTRY")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def get_host_infos_from_rctx(os_name, os_arch):
     host_os = "linux"
@@ -28,8 +31,8 @@ def _mingw_impl(rctx):
         ]
 
     substitutions = {
-        "%{toolchain_path_prefix}": "external/%s/" % rctx.name,
         "%{host_name}": host_name,
+        "%{toolchain_path_prefix}": "external/{}/".format(rctx.name),
         
         "%{clang_id}": rctx.attr.clang_id,
         "%{gcc_id}": rctx.attr.gcc_id,
@@ -83,6 +86,7 @@ _mingw_toolchain = repository_rule(
 )
 
 def mingw_toolchain(name, version = "latest"):
+    ""
     registry = MINGW_ARCHIVES_REGISTRY[version]
     gcc_id = "mingw_gcc_{}".format(registry["details"]["clang_version"])
     clang_id = "mingw_clang_{}".format(registry["details"]["clang_version"])
