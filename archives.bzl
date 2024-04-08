@@ -1,4 +1,5 @@
-""
+"""MinGW Archives
+"""
 
 load("@bazel_utilities//toolchains:archives.bzl", "gen_archives_registry")
 

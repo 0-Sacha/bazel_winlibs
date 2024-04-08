@@ -1,5 +1,6 @@
 
-""
+"""bazel_mingw
+"""
 module(
     name = "bazel_mingw",
     version = "0.0.1",

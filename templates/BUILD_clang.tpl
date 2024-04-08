@@ -37,7 +37,7 @@ cc_toolchain(
     toolchain_identifier = "%{toolchain_id}",
     toolchain_config = "cc_toolchain_config_%{toolchain_id}",
     
-    all_files = "//:all_files",
+    all_files = "//:compiler_pieces",
     ar_files = "//:ar",
     compiler_files = "//:compiler_files",
     dwp_files = "//:dwp",

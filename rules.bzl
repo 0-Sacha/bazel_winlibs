@@ -4,9 +4,7 @@ load("@bazel_mingw//:archives.bzl", "MINGW_ARCHIVES_REGISTRY")
 load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx")
 
 def _mingw_impl(rctx):
-    host_os, host_cpu, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
-    target_name = rctx.attr.target_name if rctx.attr.target_name != "" else host_os
-    target_cpu = rctx.attr.target_cpu if rctx.attr.target_name != "" else host_cpu
+    _, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
 
     registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.mingw_version]
 
@@ -15,16 +13,12 @@ def _mingw_impl(rctx):
 
     constraints = []
     constraints += rctx.attr.target_compatible_with
-    if rctx.attr.use_host_constraint:
-        constraints += [
-            "@platforms//os:{}".format(host_os),
-            "@platforms//cpu:{}".format(host_cpu)
-        ]
 
     substitutions = {
+        "%{rctx_name}": rctx.name,
         "%{host_name}": host_name,
-        "%{target_name}": target_name,
-        "%{target_cpu}": target_cpu,
+        "%{target_name}": rctx.attr.target_name,
+        "%{target_cpu}": rctx.attr.target_cpu,
         "%{toolchain_path_prefix}": "external/{}/".format(rctx.name),
         
         "%{toolchain_id}": toolchain_id,
@@ -52,7 +46,7 @@ _mingw_toolchain = repository_rule(
         'mingw_version': attr.string(default = "latest"),
         'compiler': attr.string(mandatory = True),
 
-        'target_name': attr.string(default = ""),
+        'target_name': attr.string(default = "local"),
         'target_cpu': attr.string(default = ""),
 
         'use_host_constraint': attr.bool(default = False),
@@ -62,13 +56,33 @@ _mingw_toolchain = repository_rule(
     implementation = _mingw_impl,
 )
 
-def mingw_toolchain(name, compiler = "gcc", mingw_version = "latest"):
-    ""
+def mingw_toolchain(
+        name,
+        mingw_version = "latest",
+        compiler = "gcc",
+        target_name = "local",
+        target_cpu = "",
+        target_compatible_with = []
+    ):
+    """MinGW Toolchain
+
+    This macro create a repository containing all files needded to get an hermetic toolchain
+
+    Args:
+        name: Name of the repo that will be created
+        mingw_version: The MinGW archive version
+        compiler: The compiler to use: `gcc` or `clang` (default=`gcc`)
+        target_name: The target name
+        target_cpu: The target cpu name
+        target_compatible_with: The target_compatible_with list for the toolchain
+    """
     _mingw_toolchain(
         name = name,
         mingw_version = mingw_version,
         compiler = compiler,
-        use_host_constraint = True
+        target_name = target_name,
+        target_cpu = target_cpu,
+        target_compatible_with = target_compatible_with
     )
 
     compiler_version = MINGW_ARCHIVES_REGISTRY[mingw_version]["details"]["{}_version".format(compiler)]
