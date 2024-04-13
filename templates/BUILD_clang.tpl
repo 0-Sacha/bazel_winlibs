@@ -1,4 +1,5 @@
 ""
+
 load("@@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
 load("//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
 
@@ -18,41 +19,57 @@ cc_toolchain_config(
     },
     toolchain_bins = "//:compiler_components",
     artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
-    flags = {},
+    flags = %{flags_packed},
     cxx_builtin_include_directories = [
         "%{toolchain_path_prefix}include",
         "%{toolchain_path_prefix}x86_64-w64-mingw32/include",
         "%{toolchain_path_prefix}lib/clang/%{clang_version}/include",
     ],
-    lib_directories = [
+
+    copts = %{copts},
+    conlyopts = %{conlyopts},
+    cxxopts = %{cxxopts},
+    linkopts = %{linkopts},
+    defines = %{defines},
+    includedirs = %{includedirs},
+    linkdirs = [
         "%{toolchain_path_prefix}x86_64-w64-mingw32/lib",
-    ],
+    ] + %{linkdirs},
+    
     toolchain_libs = [
         "pthread"
-    ]
+    ],
 )
 
 cc_toolchain(
     name = "cc_toolchain_%{toolchain_id}",
     toolchain_identifier = "%{toolchain_id}",
-    toolchain_config = "cc_toolchain_config_%{toolchain_id}",
+    toolchain_config = ":cc_toolchain_config_%{toolchain_id}",
     
     all_files = "//:compiler_pieces",
-    ar_files = "//:ar",
     compiler_files = "//:compiler_files",
-    dwp_files = "//:dwp",
     linker_files = "//:linker_files",
+    ar_files = "//:ar",
+    as_files = "//:as",
     objcopy_files = "//:objcopy",
     strip_files = "//:strip",
+    dwp_files = "//:dwp",
+    coverage_files = "//:coverage_files",
     supports_param_files = 0
 )
 
 toolchain(
     name = "toolchain_%{toolchain_id}",
-    toolchain = "cc_toolchain_%{toolchain_id}",
+    toolchain = ":cc_toolchain_%{toolchain_id}",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 
-    target_compatible_with = json.decode("%{target_compatible_with_packed}"),
+    target_compatible_with = %{target_compatible_with},
+)
+
+
+filegroup(
+    name = "cpp",
+    srcs = glob(["bin/clang-cpp*"]),
 )
 
 filegroup(
@@ -63,11 +80,6 @@ filegroup(
 filegroup(
     name = "cxx",
     srcs = glob(["bin/clang++*"]),
-)
-
-filegroup(
-    name = "cpp",
-    srcs = glob(["bin/clang-cpp*"]),
 )
 
 filegroup(
@@ -117,7 +129,7 @@ filegroup(
 
 
 filegroup(
-    name = "compiler_pieces",
+    name = "compiler_artfacts",
     srcs = glob([
         "**"
     ]),
@@ -130,9 +142,18 @@ filegroup(
 
 
 filegroup(
+    name = "compiler_artfacts",
+    srcs = glob([
+        "**",
+        "x86_64-w64-mingw32/**",
+        'lib/clang/%{clang_version}/**',
+    ]),
+)
+
+filegroup(
     name = "compiler_files",
     srcs = [
-        ":compiler_pieces",
+        ":compiler_artfacts",
         ":cpp",
         ":cc",
         ":cxx",
@@ -142,11 +163,22 @@ filegroup(
 filegroup(
     name = "linker_files",
     srcs = [
-        ":compiler_pieces",
+        ":compiler_artfacts",
         ":cc",
         ":cxx",
         ":ld",
         ":ar",
+    ],
+)
+
+filegroup(
+    name = "coverage_files",
+    srcs = [
+        ":compiler_artfacts",
+        ":cc",
+        ":cxx",
+        ":cov",
+        ":ld",
     ],
 )
 
