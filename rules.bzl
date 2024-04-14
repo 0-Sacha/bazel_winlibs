@@ -49,6 +49,11 @@ def _mingw_impl(rctx):
         Label("//templates:artifacts_patterns.bzl.tpl"),
         substitutions
     )
+    rctx.template(
+        "vscode.bzl",
+        Label("//templates:vscode.bzl.tpl"),
+        substitutions
+    )
 
     archive = registry["archives"][host_name]
     rctx.download_and_extract(archive["url"], sha256 = archive["sha256"], stripPrefix = archive["strip_prefix"])
