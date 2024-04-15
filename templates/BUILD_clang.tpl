@@ -127,14 +127,6 @@ filegroup(
     srcs = glob(["bin/llvm-size*"]),
 )
 
-
-filegroup(
-    name = "compiler_artfacts",
-    srcs = glob([
-        "**"
-    ]),
-)
-
 filegroup(
     name = "dwp",
     srcs = glob([]),
@@ -142,18 +134,50 @@ filegroup(
 
 
 filegroup(
-    name = "compiler_artfacts",
+    name = "compiler_includes",
     srcs = glob([
-        "**",
-        "x86_64-w64-mingw32/**",
-        'lib/clang/%{clang_version}/**',
+        "lib/clang/%{clang_version}/include/**",
+        "x86_64-w64-mingw32/include/**",
+        "include/**",
     ]),
+)
+
+filegroup(
+    name = "compiler_libs",
+    srcs = glob([
+        "x86_64-w64-mingw32/lib/*",
+        "lib/*",
+    ]),
+)
+
+filegroup(
+    name = "compiler_pieces",
+    srcs = [
+        ":compiler_includes",
+        ":compiler_libs",
+    ],
+)
+
+filegroup(
+    name = "toolchains_bins",
+    srcs = glob([
+        "bin/**",
+        "x86_64-w64-mingw32/bin/**",
+    ]),
+)
+
+filegroup(
+    name = "compiler_pieces",
+    srcs = [
+        ":compiler_includes",
+        ":compiler_libs",
+    ],
 )
 
 filegroup(
     name = "compiler_files",
     srcs = [
-        ":compiler_artfacts",
+        ":compiler_pieces",
         ":cpp",
         ":cc",
         ":cxx",
@@ -163,7 +187,7 @@ filegroup(
 filegroup(
     name = "linker_files",
     srcs = [
-        ":compiler_artfacts",
+        ":compiler_pieces",
         ":cc",
         ":cxx",
         ":ld",
@@ -174,7 +198,7 @@ filegroup(
 filegroup(
     name = "coverage_files",
     srcs = [
-        ":compiler_artfacts",
+        ":compiler_pieces",
         ":cc",
         ":cxx",
         ":cov",

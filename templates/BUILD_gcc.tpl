@@ -27,10 +27,10 @@ cc_toolchain_config(
         }
     ),
     cxx_builtin_include_directories = [
-        "%{toolchain_path_prefix}include",
-        "%{toolchain_path_prefix}x86_64-w64-mingw32/include",
         "%{toolchain_path_prefix}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include",
-        "%{toolchain_path_prefix}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include-fixed"
+        "%{toolchain_path_prefix}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include-fixed",
+        "%{toolchain_path_prefix}x86_64-w64-mingw32/include",
+        "%{toolchain_path_prefix}include",
     ],
 
     copts = %{copts},
@@ -40,8 +40,8 @@ cc_toolchain_config(
     defines = %{defines},
     includedirs = %{includedirs},
     linkdirs = [
-        "%{toolchain_path_prefix}x86_64-w64-mingw32/lib",
         "%{toolchain_path_prefix}lib/gcc/x86_64-w64-mingw32/{gcc_version}",
+        "%{toolchain_path_prefix}x86_64-w64-mingw32/lib",
     ] + %{linkdirs},
 )
 
@@ -50,7 +50,7 @@ cc_toolchain(
     toolchain_identifier = "%{toolchain_id}",
     toolchain_config = ":cc_toolchain_config_%{toolchain_id}",
     
-    all_files = "//:compiler_artfacts",
+    all_files = "//:compiler_pieces",
     compiler_files = "//:compiler_files",
     linker_files = "//:linker_files",
     ar_files = "//:ar",
@@ -138,18 +138,44 @@ filegroup(
 
 
 filegroup(
-    name = "compiler_artfacts",
+    name = "compiler_includes",
     srcs = glob([
-        "**",
-        "x86_64-w64-mingw32/**",
-        'lib/gcc/x86_64-w64-mingw32/{gcc_version}/**',
+        "lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include/**",
+        "lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include-fixed/**",
+        "x86_64-w64-mingw32/include/**",
+        "include/**",
     ]),
+)
+
+filegroup(
+    name = "compiler_libs",
+    srcs = glob([
+        "lib/gcc/x86_64-w64-mingw32/%{gcc_version}/*",
+        "x86_64-w64-mingw32/lib/*",
+        "lib/*",
+    ]),
+)
+
+filegroup(
+    name = "toolchains_bins",
+    srcs = glob([
+        "bin/**",
+        "x86_64-w64-mingw32/bin/**",
+    ]),
+)
+
+filegroup(
+    name = "compiler_pieces",
+    srcs = [
+        ":compiler_includes",
+        ":compiler_libs",
+    ],
 )
 
 filegroup(
     name = "compiler_files",
     srcs = [
-        ":compiler_artfacts",
+        ":compiler_pieces",
         ":cpp",
         ":cc",
         ":cxx",
@@ -159,7 +185,7 @@ filegroup(
 filegroup(
     name = "linker_files",
     srcs = [
-        ":compiler_artfacts",
+        ":compiler_pieces",
         ":cc",
         ":cxx",
         ":ld",
@@ -170,7 +196,7 @@ filegroup(
 filegroup(
     name = "coverage_files",
     srcs = [
-        ":compiler_artfacts",
+        ":compiler_pieces",
         ":cc",
         ":cxx",
         ":cov",
