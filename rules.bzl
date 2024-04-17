@@ -1,7 +1,7 @@
 ""
 
-load("@bazel_mingw//:archives.bzl", "MINGW_ARCHIVES_REGISTRY")
-load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx")
+load("@bazel-mingw//:archives.bzl", "MINGW_ARCHIVES_REGISTRY")
+load("@bazel-utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx")
 
 def _mingw_impl(rctx):
     _, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
@@ -116,7 +116,7 @@ def mingw_toolchain(
         includedirs: includedirs
         linkdirs: linkdirs
         
-        flags_packed: pack of flags, checkout the syntax at bazel_utilities
+        flags_packed: pack of flags, checkout the syntax at bazel-utilities
     """
     _mingw_toolchain(
         name = name,
