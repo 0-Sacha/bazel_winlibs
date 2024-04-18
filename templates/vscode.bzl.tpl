@@ -1,6 +1,19 @@
 ""
 
-load("@bazel_utilities//tools:vscode_utils.bzl", _vscode_task = "vscode_task", _vscode_launch = "vscode_launch", _vscode_project = "vscode_project")
+load("@bazel_utilities//tools:vscode_utils.bzl", _vscode_config = "vscode_config", _vscode_task = "vscode_task", _vscode_launch = "vscode_launch")
+
+def vscode_config(name, **kwargs):
+    """VS config for .vscode files
+
+    Args:
+        name: The rule name
+        **kwargs: All others vscode_project attributes
+    """
+    _vscode_config(
+        name = name,
+        compiler = "@%{rctx_name}//:cxx",
+        **kwargs
+    )
 
 def vscode_task(name, **kwargs):
     """Task setting config for .vscode files
@@ -24,18 +37,5 @@ def vscode_launch(name, **kwargs):
     _vscode_launch(
         name = name,
         debugger = "@%{rctx_name}//:dbg",
-        **kwargs
-    )
-
-def vscode_project(name, **kwargs):
-    """VS project config for .vscode files
-
-    Args:
-        name: The rule name
-        **kwargs: All others vscode_project attributes
-    """
-    _vscode_project(
-        name = name,
-        compiler = "@%{rctx_name}//:cxx",
         **kwargs
     )
