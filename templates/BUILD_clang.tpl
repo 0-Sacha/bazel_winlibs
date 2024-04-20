@@ -69,62 +69,62 @@ toolchain(
 
 filegroup(
     name = "cpp",
-    srcs = glob(["bin/clang-cpp*"]),
+    srcs = glob(["bin/clang-cpp%{extention}"]),
 )
 
 filegroup(
     name = "cc",
-    srcs = glob(["bin/clang*"]),
+    srcs = glob(["bin/clang%{extention}"]),
 )
 
 filegroup(
     name = "cxx",
-    srcs = glob(["bin/clang++*"]),
+    srcs = glob(["bin/clang++%{extention}"]),
 )
 
 filegroup(
     name = "cov",
-    srcs = glob(["bin/llvm-cov*"]),
+    srcs = glob(["bin/llvm-cov%{extention}"]),
 )
 
 filegroup(
     name = "ar",
-    srcs = glob(["bin/llvm-ar*"]),
+    srcs = glob(["bin/llvm-ar%{extention}"]),
 )
 
 filegroup(
     name = "ld",
-    srcs = glob(["bin/ld*"]),
+    srcs = glob(["bin/ld%{extention}"]),
 )
 
 filegroup(
     name = "nm",
-    srcs = glob(["bin/llvm-nm*"]),
+    srcs = glob(["bin/llvm-nm%{extention}"]),
 )
 
 filegroup(
     name = "objcopy",
-    srcs = glob(["bin/llvm-objcopy*"]),
+    srcs = glob(["bin/llvm-objcopy%{extention}"]),
 )
 
 filegroup(
     name = "objdump",
-    srcs = glob(["bin/llvm-objdump*"]),
+    srcs = glob(["bin/llvm-objdump%{extention}"]),
 )
 
 filegroup(
     name = "strip",
-    srcs = glob(["bin/llvm-strip*"]),
+    srcs = glob(["bin/llvm-strip%{extention}"]),
 )
 
 filegroup(
     name = "as",
-    srcs = glob(["bin/llvm-as*"]),
+    srcs = glob(["bin/llvm-as%{extention}"]),
 )
 
 filegroup(
     name = "size",
-    srcs = glob(["bin/llvm-size*"]),
+    srcs = glob(["bin/llvm-size%{extention}"]),
 )
 
 filegroup(
@@ -227,7 +227,7 @@ filegroup(
 
 filegroup(
     name = "dbg",
-    srcs = glob(["bin/lldb*"]),
+    srcs = glob(["bin/lldb%{extention}"]),
 )
 
 filegroup(
