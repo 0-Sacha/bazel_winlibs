@@ -152,7 +152,6 @@ filegroup(
 
 filegroup(
     name = "toolchains_bins",
-    name = "compiler_includes",
     srcs = glob([
         "lib/clang/%{clang_version}/include/**",
         "x86_64-w64-mingw32/include/**",
@@ -172,7 +171,6 @@ filegroup(
     name = "compiler_files",
     srcs = [
         ":compiler_pieces",
-        ":compiler_pieces",
         ":cpp",
         ":cc",
         ":cxx",
@@ -182,7 +180,6 @@ filegroup(
 filegroup(
     name = "linker_files",
     srcs = [
-        ":compiler_pieces",
         ":compiler_pieces",
         ":cc",
         ":cxx",
@@ -194,7 +191,6 @@ filegroup(
 filegroup(
     name = "coverage_files",
     srcs = [
-        ":compiler_pieces",
         ":compiler_pieces",
         ":cc",
         ":cxx",
