@@ -1,6 +1,6 @@
 ""
 
-load("@@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@bazel-utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
 load("//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
 
 package(default_visibility = ["//visibility:public"])
@@ -160,7 +160,44 @@ filegroup(
 
 filegroup(
     name = "toolchains_bins",
+    name = "compiler_includes",
     srcs = glob([
+        "lib/clang/%{clang_version}/include/**",
+        "x86_64-w64-mingw32/include/**",
+        "include/**",
+    ]),
+)
+
+filegroup(
+    name = "compiler_libs",
+    srcs = glob([
+        "x86_64-w64-mingw32/lib/*",
+        "lib/*",
+    ]),
+)
+
+filegroup(
+    name = "compiler_pieces",
+    srcs = [
+        ":compiler_includes",
+        ":compiler_libs",
+    ],
+)
+
+filegroup(
+    name = "toolchains_bins",
+    srcs = glob([
+        "bin/**",
+        "x86_64-w64-mingw32/bin/**",
+    ]),
+)
+
+filegroup(
+    name = "compiler_pieces",
+    srcs = [
+        ":compiler_includes",
+        ":compiler_libs",
+    ],
         "bin/**",
         "x86_64-w64-mingw32/bin/**",
     ]),
@@ -178,6 +215,7 @@ filegroup(
     name = "compiler_files",
     srcs = [
         ":compiler_pieces",
+        ":compiler_pieces",
         ":cpp",
         ":cc",
         ":cxx",
@@ -187,6 +225,7 @@ filegroup(
 filegroup(
     name = "linker_files",
     srcs = [
+        ":compiler_pieces",
         ":compiler_pieces",
         ":cc",
         ":cxx",
@@ -198,6 +237,7 @@ filegroup(
 filegroup(
     name = "coverage_files",
     srcs = [
+        ":compiler_pieces",
         ":compiler_pieces",
         ":cc",
         ":cxx",

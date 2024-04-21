@@ -122,7 +122,7 @@ def mingw_toolchain(
         includedirs: includedirs
         linkdirs: linkdirs
         
-        flags_packed: pack of flags, checkout the syntax at bazel_utilities
+        flags_packed: pack of flags, checkout the syntax at bazel-utilities
     """
     _mingw_toolchain(
         name = name,
