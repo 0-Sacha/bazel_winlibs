@@ -1,10 +1,10 @@
 ""
 
-load("@bazel-mingw//:archives.bzl", "MINGW_ARCHIVES_REGISTRY")
-load("@bazel-utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx")
+load("@bazel_mingw//:archives.bzl", "MINGW_ARCHIVES_REGISTRY")
+load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "HOST_EXTENTION")
 
 def _mingw_impl(rctx):
-    _, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
+    host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
 
     registry = MINGW_ARCHIVES_REGISTRY[rctx.attr.mingw_version]
 
@@ -19,6 +19,7 @@ def _mingw_impl(rctx):
 
     substitutions = {
         "%{rctx_name}": rctx.name,
+        "%{extention}": HOST_EXTENTION[host_os],
         "%{toolchain_path_prefix}": "external/{}/".format(rctx.name),
         "%{host_name}": host_name,
         "%{toolchain_id}": toolchain_id,
@@ -47,6 +48,11 @@ def _mingw_impl(rctx):
     rctx.template(
         "artifacts_patterns.bzl",
         Label("//templates:artifacts_patterns.bzl.tpl"),
+        substitutions
+    )
+    rctx.template(
+        "vscode.bzl",
+        Label("//templates:vscode.bzl.tpl"),
         substitutions
     )
 

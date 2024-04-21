@@ -73,62 +73,62 @@ toolchain(
 
 filegroup(
     name = "cpp",
-    srcs = glob(["bin/cpp*"]),
+    srcs = glob(["bin/cpp%{extention}"]),
 )
 
 filegroup(
     name = "cc",
-    srcs = glob(["bin/gcc*"]),
+    srcs = glob(["bin/gcc%{extention}"]),
 )
 
 filegroup(
     name = "cxx",
-    srcs = glob(["bin/g++*"]),
+    srcs = glob(["bin/g++%{extention}"]),
 )
 
 filegroup(
     name = "cov",
-    srcs = glob(["bin/gcov*"]),
+    srcs = glob(["bin/gcov%{extention}"]),
 )
 
 filegroup(
     name = "ar",
-    srcs = glob(["bin/ar*"]),
+    srcs = glob(["bin/ar%{extention}"]),
 )
 
 filegroup(
     name = "ld",
-    srcs = glob(["bin/ld*"]),
+    srcs = glob(["bin/ld%{extention}"]),
 )
 
 filegroup(
     name = "nm",
-    srcs = glob(["bin/nm*"]),
+    srcs = glob(["bin/nm%{extention}"]),
 )
 
 filegroup(
     name = "objcopy",
-    srcs = glob(["bin/objcopy*"]),
+    srcs = glob(["bin/objcopy%{extention}"]),
 )
 
 filegroup(
     name = "objdump",
-    srcs = glob(["bin/objdump*"]),
+    srcs = glob(["bin/objdump%{extention}"]),
 )
 
 filegroup(
     name = "strip",
-    srcs = glob(["bin/strip*"]),
+    srcs = glob(["bin/strip%{extention}"]),
 )
 
 filegroup(
     name = "as",
-    srcs = glob(["bin/as*"]),
+    srcs = glob(["bin/as%{extention}"]),
 )
 
 filegroup(
     name = "size",
-    srcs = glob(["bin/size*"]),
+    srcs = glob(["bin/size%{extention}"]),
 )
 
 filegroup(
@@ -225,7 +225,7 @@ filegroup(
 
 filegroup(
     name = "dbg",
-    srcs = glob(["bin/gdb*"]),
+    srcs = glob(["bin/gdb%{extention}"]),
 )
 
 filegroup(

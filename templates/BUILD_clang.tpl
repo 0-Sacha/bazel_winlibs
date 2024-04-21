@@ -1,6 +1,6 @@
 ""
 
-load("@@bazel-utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@bazel-utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
 load("//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
 
 package(default_visibility = ["//visibility:public"])
@@ -69,62 +69,62 @@ toolchain(
 
 filegroup(
     name = "cpp",
-    srcs = glob(["bin/clang-cpp*"]),
+    srcs = glob(["bin/clang-cpp%{extention}"]),
 )
 
 filegroup(
     name = "cc",
-    srcs = glob(["bin/clang*"]),
+    srcs = glob(["bin/clang%{extention}"]),
 )
 
 filegroup(
     name = "cxx",
-    srcs = glob(["bin/clang++*"]),
+    srcs = glob(["bin/clang++%{extention}"]),
 )
 
 filegroup(
     name = "cov",
-    srcs = glob(["bin/llvm-cov*"]),
+    srcs = glob(["bin/llvm-cov%{extention}"]),
 )
 
 filegroup(
     name = "ar",
-    srcs = glob(["bin/llvm-ar*"]),
+    srcs = glob(["bin/llvm-ar%{extention}"]),
 )
 
 filegroup(
     name = "ld",
-    srcs = glob(["bin/ld*"]),
+    srcs = glob(["bin/ld%{extention}"]),
 )
 
 filegroup(
     name = "nm",
-    srcs = glob(["bin/llvm-nm*"]),
+    srcs = glob(["bin/llvm-nm%{extention}"]),
 )
 
 filegroup(
     name = "objcopy",
-    srcs = glob(["bin/llvm-objcopy*"]),
+    srcs = glob(["bin/llvm-objcopy%{extention}"]),
 )
 
 filegroup(
     name = "objdump",
-    srcs = glob(["bin/llvm-objdump*"]),
+    srcs = glob(["bin/llvm-objdump%{extention}"]),
 )
 
 filegroup(
     name = "strip",
-    srcs = glob(["bin/llvm-strip*"]),
+    srcs = glob(["bin/llvm-strip%{extention}"]),
 )
 
 filegroup(
     name = "as",
-    srcs = glob(["bin/llvm-as*"]),
+    srcs = glob(["bin/llvm-as%{extention}"]),
 )
 
 filegroup(
     name = "size",
-    srcs = glob(["bin/llvm-size*"]),
+    srcs = glob(["bin/llvm-size%{extention}"]),
 )
 
 filegroup(
@@ -134,6 +134,32 @@ filegroup(
 
 
 filegroup(
+    name = "compiler_includes",
+    srcs = glob([
+        "lib/clang/%{clang_version}/include/**",
+        "x86_64-w64-mingw32/include/**",
+        "include/**",
+    ]),
+)
+
+filegroup(
+    name = "compiler_libs",
+    srcs = glob([
+        "x86_64-w64-mingw32/lib/*",
+        "lib/*",
+    ]),
+)
+
+filegroup(
+    name = "compiler_pieces",
+    srcs = [
+        ":compiler_includes",
+        ":compiler_libs",
+    ],
+)
+
+filegroup(
+    name = "toolchains_bins",
     name = "compiler_includes",
     srcs = glob([
         "lib/clang/%{clang_version}/include/**",
@@ -172,11 +198,23 @@ filegroup(
         ":compiler_includes",
         ":compiler_libs",
     ],
+        "bin/**",
+        "x86_64-w64-mingw32/bin/**",
+    ]),
+)
+
+filegroup(
+    name = "compiler_pieces",
+    srcs = [
+        ":compiler_includes",
+        ":compiler_libs",
+    ],
 )
 
 filegroup(
     name = "compiler_files",
     srcs = [
+        ":compiler_pieces",
         ":compiler_pieces",
         ":cpp",
         ":cc",
@@ -188,6 +226,7 @@ filegroup(
     name = "linker_files",
     srcs = [
         ":compiler_pieces",
+        ":compiler_pieces",
         ":cc",
         ":cxx",
         ":ld",
@@ -198,6 +237,7 @@ filegroup(
 filegroup(
     name = "coverage_files",
     srcs = [
+        ":compiler_pieces",
         ":compiler_pieces",
         ":cc",
         ":cxx",
@@ -227,7 +267,7 @@ filegroup(
 
 filegroup(
     name = "dbg",
-    srcs = glob(["bin/lldb*"]),
+    srcs = glob(["bin/lldb%{extention}"]),
 )
 
 filegroup(
