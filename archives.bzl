@@ -1,9 +1,10 @@
 """MinGW Archives
 """
 
-load("@bazel-utilities//toolchains:archives.bzl", "gen_archives_registry")
+load("@bazel_utilities//toolchains:archives.bzl", "gen_archives_registry")
 
 MINGW_ARCHIVES_13_2_0POSIX = {
+    "toolchain": "MinGW",
     "version": "13.2.0posix",
     "version-short": "13.2",
     "latest": True,
@@ -17,6 +18,6 @@ MINGW_ARCHIVES_13_2_0POSIX = {
     }
 }
 
-MINGW_ARCHIVES_REGISTRY = gen_archives_registry([
+MINGW_REGISTRY = gen_archives_registry([
     MINGW_ARCHIVES_13_2_0POSIX
 ])

@@ -1,8 +1,8 @@
 
-"""bazel-mingw
+"""bazel_mingw
 """
 module(
-    name = "bazel-mingw",
+    name = "bazel_mingw",
     version = "0.0.1",
-    repo_name = "sacha_bazel-mingw",
+    repo_name = "sacha_bazel_mingw",
 )
