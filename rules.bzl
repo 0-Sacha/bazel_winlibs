@@ -1,10 +1,10 @@
 ""
 
-load("@bazel_mingw//:archives.bzl", "MINGW_REGISTRY")
 load("@bazel_utilities//toolchains:archives.bzl", "get_archive_from_registry")
 load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "HOST_EXTENTION")
+load("@bazel_winlibs_mingw//:archives.bzl", "WINLIBS_MINGW_REGISTRY")
 
-def _mingw_compiler_archive_impl(rctx):
+def _winlibs_mingw_compiler_archive_impl(rctx):
     host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
     
     substitutions = {
@@ -30,8 +30,8 @@ def _mingw_compiler_archive_impl(rctx):
         stripPrefix = archive["strip_prefix"],
     )
 
-mingw_compiler_archive = repository_rule(
-    implementation = _mingw_compiler_archive_impl,
+winlibs_mingw_compiler_archive = repository_rule(
+    implementation = _winlibs_mingw_compiler_archive_impl,
     attrs = {
         'compiler': attr.string(mandatory = True),
         'clang_version': attr.string(mandatory = True),
@@ -42,14 +42,14 @@ mingw_compiler_archive = repository_rule(
 )
 
 
-def _mingw_impl(rctx):
+def _winlibs_mingw_impl(rctx):
     host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
 
     toolchain_id = ""
     if rctx.attr.compiler == "gcc":
-        toolchain_id = "mingw_{}_{}".format(rctx.attr.compiler, rctx.attr.gcc_version)
+        toolchain_id = "winlibs_mingw_{}_{}".format(rctx.attr.compiler, rctx.attr.gcc_version)
     elif rctx.attr.compiler == "clang":
-        toolchain_id = "mingw_{}_{}".format(rctx.attr.compiler, rctx.attr.clang_version)
+        toolchain_id = "winlibs_mingw_{}_{}".format(rctx.attr.compiler, rctx.attr.clang_version)
     else:
         print("Compiler {} not supported by MinGW".format(rctx.attr.compiler)) # buildifier: disable=print
         
@@ -105,9 +105,9 @@ def _mingw_impl(rctx):
             stripPrefix = archive["strip_prefix"],
         )
 
-_mingw_toolchain = repository_rule(
+_winlibs_mingw_toolchain = repository_rule(
     attrs = {
-        'mingw_version': attr.string(default = "latest"),
+        'winlibs_mingw_version': attr.string(default = "latest"),
         'compiler': attr.string(mandatory = True),
         'clang_version': attr.string(mandatory = True),
         'gcc_version': attr.string(mandatory = True),
@@ -131,12 +131,12 @@ _mingw_toolchain = repository_rule(
         'flags_packed': attr.string_dict(default = {}),
     },
     local = False,
-    implementation = _mingw_impl,
+    implementation = _winlibs_mingw_impl,
 )
 
-def mingw_toolchain(
+def winlibs_mingw_toolchain(
         name,
-        mingw_version = "latest",
+        winlibs_mingw_version = "latest",
         compiler = "gcc",
 
         target_name = "local",
@@ -154,7 +154,7 @@ def mingw_toolchain(
         flags_packed = {},
         
         local_download = True,
-        registry = MINGW_REGISTRY,
+        registry = WINLIBS_MINGW_REGISTRY,
     ):
     """MinGW Toolchain
 
@@ -162,7 +162,7 @@ def mingw_toolchain(
 
     Args:
         name: Name of the repo that will be created
-        mingw_version: The MinGW archive version
+        winlibs_mingw_version: The MinGW archive version
         compiler: The compiler to use: `gcc` or `clang` (default=`gcc`)
 
         target_name: The target name
@@ -184,12 +184,12 @@ def mingw_toolchain(
     """
     compiler_package = ""
 
-    archive = get_archive_from_registry(registry, "MinGW", mingw_version)
+    archive = get_archive_from_registry(registry, "MinGW", winlibs_mingw_version)
     compiler_version = archive["details"]["{}_version".format(compiler)]
 
     if local_download == False:
-        compiler_package = "mingw_{}_{}".format(compiler, compiler_version)
-        mingw_compiler_archive(
+        compiler_package = "winlibs_mingw_{}_{}".format(compiler, compiler_version)
+        winlibs_mingw_compiler_archive(
             name = compiler_package,
             compiler = compiler,
             clang_version = archive["details"]["clang_version"],
@@ -197,9 +197,9 @@ def mingw_toolchain(
             archives = json.encode(archive["archives"]),
         )
 
-    _mingw_toolchain(
+    _winlibs_mingw_toolchain(
         name = name,
-        mingw_version = mingw_version,
+        winlibs_mingw_version = winlibs_mingw_version,
         compiler = compiler,
         clang_version = archive["details"]["clang_version"],
         gcc_version = archive["details"]["gcc_version"],
@@ -224,4 +224,4 @@ def mingw_toolchain(
     )
 
     compiler_version = archive["details"]["{}_version".format(compiler)]
-    native.register_toolchains("@{}//:toolchain_mingw_{}_{}".format(name, compiler, compiler_version))
+    native.register_toolchains("@{}//:toolchain_winlibs_mingw_{}_{}".format(name, compiler, compiler_version))

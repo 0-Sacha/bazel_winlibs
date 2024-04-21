@@ -1,6 +1,6 @@
 ""
 
-load("@bazel_mingw//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
+load("@bazel_winlibs_mingw//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
 
