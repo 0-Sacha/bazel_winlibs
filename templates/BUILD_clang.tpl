@@ -153,9 +153,8 @@ filegroup(
 filegroup(
     name = "toolchains_bins",
     srcs = glob([
-        "lib/clang/%{clang_version}/include/**",
-        "x86_64-w64-mingw32/include/**",
-        "include/**",
+        "bin/*%{extention}",
+        "x86_64-w64-mingw32/bin/*%{extention}",
     ]),
 )
 
@@ -202,25 +201,25 @@ filegroup(
 filegroup(
     name = "compiler_components",
     srcs = [
-        "cc",
-        "cxx",
-        "cpp",
-        "cov",
-        "ar",
-        "ld",
-        "nm",
-        "objcopy",
-        "objdump",
-        "strip",
-        "as",
-        "size",
+        ":cc",
+        ":cxx",
+        ":cpp",
+        ":cov",
+        ":ar",
+        ":ld",
+        ":nm",
+        ":objcopy",
+        ":objdump",
+        ":strip",
+        ":as",
+        ":size",
     ],
 )
 
 
 filegroup(
     name = "dbg",
-    srcs = glob(["bin/lldb%{extention}"]),
+    srcs = ["bin/lldb%{extention}"],
 )
 
 filegroup(
