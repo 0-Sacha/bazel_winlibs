@@ -1,8 +1,8 @@
 ""
 
+load("@bazel_mingw//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
-load("@bazel-utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
-load("//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
+load("@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -18,19 +18,19 @@ cc_toolchain_config(
         "cxx": "g++",
         "cov": "gcov",
     },
-    toolchain_bins = "//:compiler_components",
+    toolchain_bins = "%{compiler_package}:compiler_components",
     artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
     flags = dicts.add(
         %{flags_packed},
         {
-            "##linkcopts;copts":  "-no-canonical-prefixes;-fno-canonical-system-headers"
+            "##linkcopts,copts":  "-no-canonical-prefixes,-fno-canonical-system-headers"
         }
     ),
     cxx_builtin_include_directories = [
-        "%{toolchain_path_prefix}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include",
-        "%{toolchain_path_prefix}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include-fixed",
-        "%{toolchain_path_prefix}x86_64-w64-mingw32/include",
-        "%{toolchain_path_prefix}include",
+        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include",
+        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include-fixed",
+        "%{compiler_package_path}x86_64-w64-mingw32/include",
+        "%{compiler_package_path}include",
     ],
 
     copts = %{copts},
@@ -40,8 +40,8 @@ cc_toolchain_config(
     defines = %{defines},
     includedirs = %{includedirs},
     linkdirs = [
-        "%{toolchain_path_prefix}lib/gcc/x86_64-w64-mingw32/{gcc_version}",
-        "%{toolchain_path_prefix}x86_64-w64-mingw32/lib",
+        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/{gcc_version}",
+        "%{compiler_package_path}x86_64-w64-mingw32/lib",
     ] + %{linkdirs},
 )
 
@@ -50,15 +50,15 @@ cc_toolchain(
     toolchain_identifier = "%{toolchain_id}",
     toolchain_config = ":cc_toolchain_config_%{toolchain_id}",
     
-    all_files = "//:compiler_pieces",
-    compiler_files = "//:compiler_files",
-    linker_files = "//:linker_files",
-    ar_files = "//:ar",
-    as_files = "//:as",
-    objcopy_files = "//:objcopy",
-    strip_files = "//:strip",
-    dwp_files = "//:dwp",
-    coverage_files = "//:coverage_files",
+    all_files = "%{compiler_package}:compiler_pieces",
+    compiler_files = "%{compiler_package}:compiler_files",
+    linker_files = "%{compiler_package}:linker_files",
+    ar_files = "%{compiler_package}:ar",
+    as_files = "%{compiler_package}:as",
+    objcopy_files = "%{compiler_package}:objcopy",
+    strip_files = "%{compiler_package}:strip",
+    dwp_files = "%{compiler_package}:dwp",
+    coverage_files = "%{compiler_package}:coverage_files",
     supports_param_files = 0
 )
 
@@ -73,67 +73,67 @@ toolchain(
 
 filegroup(
     name = "cpp",
-    srcs = glob(["bin/cpp%{extention}"]),
+    srcs = ["bin/cpp%{extention}"],
 )
 
 filegroup(
     name = "cc",
-    srcs = glob(["bin/gcc%{extention}"]),
+    srcs = ["bin/gcc%{extention}"],
 )
 
 filegroup(
     name = "cxx",
-    srcs = glob(["bin/g++%{extention}"]),
+    srcs = ["bin/g++%{extention}"],
 )
 
 filegroup(
     name = "cov",
-    srcs = glob(["bin/gcov%{extention}"]),
+    srcs = ["bin/gcov%{extention}"],
 )
 
 filegroup(
     name = "ar",
-    srcs = glob(["bin/ar%{extention}"]),
+    srcs = ["bin/ar%{extention}"],
 )
 
 filegroup(
     name = "ld",
-    srcs = glob(["bin/ld%{extention}"]),
+    srcs = ["bin/ld%{extention}"],
 )
 
 filegroup(
     name = "nm",
-    srcs = glob(["bin/nm%{extention}"]),
+    srcs = ["bin/nm%{extention}"],
 )
 
 filegroup(
     name = "objcopy",
-    srcs = glob(["bin/objcopy%{extention}"]),
+    srcs = ["bin/objcopy%{extention}"],
 )
 
 filegroup(
     name = "objdump",
-    srcs = glob(["bin/objdump%{extention}"]),
+    srcs = ["bin/objdump%{extention}"],
 )
 
 filegroup(
     name = "strip",
-    srcs = glob(["bin/strip%{extention}"]),
+    srcs = ["bin/strip%{extention}"],
 )
 
 filegroup(
     name = "as",
-    srcs = glob(["bin/as%{extention}"]),
+    srcs = ["bin/as%{extention}"],
 )
 
 filegroup(
     name = "size",
-    srcs = glob(["bin/size%{extention}"]),
+    srcs = ["bin/size%{extention}"],
 )
 
 filegroup(
     name = "dwp",
-    srcs = glob([]),
+    srcs = [],
 )
 
 
@@ -225,7 +225,7 @@ filegroup(
 
 filegroup(
     name = "dbg",
-    srcs = glob(["bin/gdb%{extention}"]),
+    srcs = ["bin/gdb%{extention}"],
 )
 
 filegroup(

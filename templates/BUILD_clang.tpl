@@ -1,7 +1,7 @@
 ""
 
-load("@bazel-utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
-load("//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
+load("@bazel_mingw//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
+load("@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -17,13 +17,13 @@ cc_toolchain_config(
         "cxx": "clang++",
         "cov": "llvm-cov",
     },
-    toolchain_bins = "//:compiler_components",
+    toolchain_bins = "%{compiler_package}:compiler_components",
     artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
     flags = %{flags_packed},
     cxx_builtin_include_directories = [
-        "%{toolchain_path_prefix}include",
-        "%{toolchain_path_prefix}x86_64-w64-mingw32/include",
-        "%{toolchain_path_prefix}lib/clang/%{clang_version}/include",
+        "%{compiler_package_path}include",
+        "%{compiler_package_path}x86_64-w64-mingw32/include",
+        "%{compiler_package_path}lib/clang/%{clang_version}/include",
     ],
 
     copts = %{copts},
@@ -33,7 +33,7 @@ cc_toolchain_config(
     defines = %{defines},
     includedirs = %{includedirs},
     linkdirs = [
-        "%{toolchain_path_prefix}x86_64-w64-mingw32/lib",
+        "%{compiler_package_path}x86_64-w64-mingw32/lib",
     ] + %{linkdirs},
     
     toolchain_libs = [
@@ -46,15 +46,15 @@ cc_toolchain(
     toolchain_identifier = "%{toolchain_id}",
     toolchain_config = ":cc_toolchain_config_%{toolchain_id}",
     
-    all_files = "//:compiler_pieces",
-    compiler_files = "//:compiler_files",
-    linker_files = "//:linker_files",
-    ar_files = "//:ar",
-    as_files = "//:as",
-    objcopy_files = "//:objcopy",
-    strip_files = "//:strip",
-    dwp_files = "//:dwp",
-    coverage_files = "//:coverage_files",
+    all_files = "%{compiler_package}:compiler_pieces",
+    compiler_files = "%{compiler_package}:compiler_files",
+    linker_files = "%{compiler_package}:linker_files",
+    ar_files = "%{compiler_package}:ar",
+    as_files = "%{compiler_package}:as",
+    objcopy_files = "%{compiler_package}:objcopy",
+    strip_files = "%{compiler_package}:strip",
+    dwp_files = "%{compiler_package}:dwp",
+    coverage_files = "%{compiler_package}:coverage_files",
     supports_param_files = 0
 )
 
@@ -69,67 +69,67 @@ toolchain(
 
 filegroup(
     name = "cpp",
-    srcs = glob(["bin/clang-cpp%{extention}"]),
+    srcs = ["bin/clang-cpp%{extention}"],
 )
 
 filegroup(
     name = "cc",
-    srcs = glob(["bin/clang%{extention}"]),
+    srcs = ["bin/clang%{extention}"],
 )
 
 filegroup(
     name = "cxx",
-    srcs = glob(["bin/clang++%{extention}"]),
+    srcs = ["bin/clang++%{extention}"],
 )
 
 filegroup(
     name = "cov",
-    srcs = glob(["bin/llvm-cov%{extention}"]),
+    srcs = ["bin/llvm-cov%{extention}"],
 )
 
 filegroup(
     name = "ar",
-    srcs = glob(["bin/llvm-ar%{extention}"]),
+    srcs = ["bin/llvm-ar%{extention}"],
 )
 
 filegroup(
     name = "ld",
-    srcs = glob(["bin/ld%{extention}"]),
+    srcs = ["bin/ld%{extention}"],
 )
 
 filegroup(
     name = "nm",
-    srcs = glob(["bin/llvm-nm%{extention}"]),
+    srcs = ["bin/llvm-nm%{extention}"],
 )
 
 filegroup(
     name = "objcopy",
-    srcs = glob(["bin/llvm-objcopy%{extention}"]),
+    srcs = ["bin/llvm-objcopy%{extention}"],
 )
 
 filegroup(
     name = "objdump",
-    srcs = glob(["bin/llvm-objdump%{extention}"]),
+    srcs = ["bin/llvm-objdump%{extention}"],
 )
 
 filegroup(
     name = "strip",
-    srcs = glob(["bin/llvm-strip%{extention}"]),
+    srcs = ["bin/llvm-strip%{extention}"],
 )
 
 filegroup(
     name = "as",
-    srcs = glob(["bin/llvm-as%{extention}"]),
+    srcs = ["bin/llvm-as%{extention}"],
 )
 
 filegroup(
     name = "size",
-    srcs = glob(["bin/llvm-size%{extention}"]),
+    srcs = ["bin/llvm-size%{extention}"],
 )
 
 filegroup(
     name = "dwp",
-    srcs = glob([]),
+    srcs = [],
 )
 
 
@@ -151,55 +151,12 @@ filegroup(
 )
 
 filegroup(
-    name = "compiler_pieces",
-    srcs = [
-        ":compiler_includes",
-        ":compiler_libs",
-    ],
-)
-
-filegroup(
     name = "toolchains_bins",
     name = "compiler_includes",
     srcs = glob([
         "lib/clang/%{clang_version}/include/**",
         "x86_64-w64-mingw32/include/**",
         "include/**",
-    ]),
-)
-
-filegroup(
-    name = "compiler_libs",
-    srcs = glob([
-        "x86_64-w64-mingw32/lib/*",
-        "lib/*",
-    ]),
-)
-
-filegroup(
-    name = "compiler_pieces",
-    srcs = [
-        ":compiler_includes",
-        ":compiler_libs",
-    ],
-)
-
-filegroup(
-    name = "toolchains_bins",
-    srcs = glob([
-        "bin/**",
-        "x86_64-w64-mingw32/bin/**",
-    ]),
-)
-
-filegroup(
-    name = "compiler_pieces",
-    srcs = [
-        ":compiler_includes",
-        ":compiler_libs",
-    ],
-        "bin/**",
-        "x86_64-w64-mingw32/bin/**",
     ]),
 )
 
