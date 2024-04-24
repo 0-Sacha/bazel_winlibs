@@ -1,6 +1,7 @@
-
 """bazel_winlibs_mingw
+
 """
+
 module(
     name = "bazel_winlibs_mingw",
     version = "0.0.1",

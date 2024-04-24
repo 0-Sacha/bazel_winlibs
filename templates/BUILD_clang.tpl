@@ -94,7 +94,7 @@ filegroup(
 
 filegroup(
     name = "ld",
-    srcs = ["bin/ld%{extention}"],
+    srcs = ["bin/lld%{extention}"],
 )
 
 filegroup(
@@ -129,7 +129,7 @@ filegroup(
 
 filegroup(
     name = "dwp",
-    srcs = [],
+    srcs = ["bin/llvm-dwp%{extention}"],
 )
 
 
@@ -152,11 +152,9 @@ filegroup(
 
 filegroup(
     name = "toolchains_bins",
-    name = "compiler_includes",
     srcs = glob([
-        "lib/clang/%{clang_version}/include/**",
-        "x86_64-w64-mingw32/include/**",
-        "include/**",
+        "x86_64-w64-mingw32/bin/*%{extention}",
+        "bin/*%{extention}",
     ]),
 )
 
@@ -206,18 +204,19 @@ filegroup(
 filegroup(
     name = "compiler_components",
     srcs = [
-        "cc",
-        "cxx",
-        "cpp",
-        "cov",
-        "ar",
-        "ld",
-        "nm",
-        "objcopy",
-        "objdump",
-        "strip",
-        "as",
-        "size",
+        ":cpp",
+        ":cc",
+        ":cxx",
+        ":cov",
+        ":ar",
+        ":ld",
+        ":nm",
+        ":objcopy",
+        ":objdump",
+        ":strip",
+        ":as",
+        ":size",
+        ":dwp",
     ],
 )
 

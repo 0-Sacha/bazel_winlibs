@@ -5,67 +5,67 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "cpp",
-    srcs = glob(["bin/cpp%{extention}"]),
+    srcs = ["bin/cpp%{extention}"],
 )
 
 filegroup(
     name = "cc",
-    srcs = glob(["bin/gcc%{extention}"]),
+    srcs = ["bin/gcc%{extention}"],
 )
 
 filegroup(
     name = "cxx",
-    srcs = glob(["bin/g++%{extention}"]),
+    srcs = ["bin/g++%{extention}"],
 )
 
 filegroup(
     name = "cov",
-    srcs = glob(["bin/gcov%{extention}"]),
+    srcs = ["bin/gcov%{extention}"],
 )
 
 filegroup(
     name = "ar",
-    srcs = glob(["bin/ar%{extention}"]),
+    srcs = ["bin/ar%{extention}"],
 )
 
 filegroup(
     name = "ld",
-    srcs = glob(["bin/ld%{extention}"]),
+    srcs = ["bin/ld%{extention}"],
 )
 
 filegroup(
     name = "nm",
-    srcs = glob(["bin/nm%{extention}"]),
+    srcs = ["bin/nm%{extention}"],
 )
 
 filegroup(
     name = "objcopy",
-    srcs = glob(["bin/objcopy%{extention}"]),
+    srcs = ["bin/objcopy%{extention}"],
 )
 
 filegroup(
     name = "objdump",
-    srcs = glob(["bin/objdump%{extention}"]),
+    srcs = ["bin/objdump%{extention}"],
 )
 
 filegroup(
     name = "strip",
-    srcs = glob(["bin/strip%{extention}"]),
+    srcs = ["bin/strip%{extention}"],
 )
 
 filegroup(
     name = "as",
-    srcs = glob(["bin/as%{extention}"]),
+    srcs = ["bin/as%{extention}"],
 )
 
 filegroup(
     name = "size",
-    srcs = glob(["bin/size%{extention}"]),
+    srcs = ["bin/size%{extention}"],
 )
 
 filegroup(
     name = "dwp",
-    srcs = glob([]),
+    srcs = [],
 )
 
 
@@ -91,8 +91,8 @@ filegroup(
 filegroup(
     name = "toolchains_bins",
     srcs = glob([
-        "bin/**",
-        "x86_64-w64-mingw32/bin/**",
+        "x86_64-w64-mingw32/bin/*%{extention}",
+        "bin/*%{extention}",
     ]),
 )
 
@@ -139,25 +139,26 @@ filegroup(
 filegroup(
     name = "compiler_components",
     srcs = [
-        "cc",
-        "cxx",
-        "cpp",
-        "cov",
-        "ar",
-        "ld",
-        "nm",
-        "objcopy",
-        "objdump",
-        "strip",
-        "as",
-        "size",
+        ":cpp",
+        ":cc",
+        ":cxx",
+        ":cov",
+        ":ar",
+        ":ld",
+        ":nm",
+        ":objcopy",
+        ":objdump",
+        ":strip",
+        ":as",
+        ":size",
+        ":dwp",
     ],
 )
 
 
 filegroup(
     name = "dbg",
-    srcs = glob(["bin/gdb%{extention}"]),
+    srcs = ["bin/gdb%{extention}"],
 )
 
 filegroup(

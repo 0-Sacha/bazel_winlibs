@@ -59,16 +59,23 @@ def _winlibs_mingw_impl(rctx):
     flags_packed = {}
     flags_packed.update(rctx.attr.flags_packed)
 
+    toolchain_path = "external/{}/".format(rctx.name)
+    compiler_package = ""
+    compiler_package_path = toolchain_path
+    if rctx.attr.local_download == False:
+        compiler_package = "@{}//".format(rctx.attr.compiler_package_name)
+        compiler_package_path = "external/{}/".format(rctx.attr.compiler_package_name)
+
     substitutions = {
         "%{rctx_name}": rctx.name,
         "%{extention}": HOST_EXTENTION[host_os],
-        "%{toolchain_path_prefix}": "external/{}/".format(rctx.name),
+        "%{toolchain_path}": toolchain_path,
         "%{host_name}": host_name,
         "%{toolchain_id}": toolchain_id,
         "%{clang_version}": rctx.attr.clang_version,
         "%{gcc_version}": rctx.attr.gcc_version,
-        "%{compiler_package}": "@{}//".format(rctx.attr.compiler_package) if rctx.attr.compiler_package != "" else "",
-        "%{compiler_package_path}": "external/{}/".format(rctx.attr.compiler_package),
+        "%{compiler_package}": compiler_package,
+        "%{compiler_package_path}": compiler_package_path,
         
         "%{target_name}": rctx.attr.target_name,
         "%{target_cpu}": rctx.attr.target_cpu,
@@ -114,7 +121,7 @@ _winlibs_mingw_toolchain = repository_rule(
 
         'local_download': attr.bool(default = True),
         'archives': attr.string(mandatory = True),
-        'compiler_package': attr.string(mandatory = True),
+        'compiler_package_name': attr.string(mandatory = True),
 
         'target_name': attr.string(default = "local"),
         'target_cpu': attr.string(default = ""),
@@ -182,15 +189,15 @@ def winlibs_mingw_toolchain(
         local_download: wether the archive should be downloaded in the same repository (True) or in its own repo
         registry: The arm registry to use, to allow close environement to provide their own mirroir/url
     """
-    compiler_package = ""
+    compiler_package_name = ""
 
     archive = get_archive_from_registry(registry, "MinGW", winlibs_mingw_version)
     compiler_version = archive["details"]["{}_version".format(compiler)]
 
     if local_download == False:
-        compiler_package = "winlibs_mingw_{}_{}".format(compiler, compiler_version)
+        compiler_package_name = "archive_winlibs_mingw_{}_{}".format(compiler, compiler_version)
         winlibs_mingw_compiler_archive(
-            name = compiler_package,
+            name = compiler_package_name,
             compiler = compiler,
             clang_version = archive["details"]["clang_version"],
             gcc_version = archive["details"]["gcc_version"],
@@ -206,7 +213,7 @@ def winlibs_mingw_toolchain(
 
         local_download = local_download,
         archives = json.encode(archive["archives"]),
-        compiler_package = compiler_package,
+        compiler_package_name = compiler_package_name,
 
         target_name = target_name,
         target_cpu = target_cpu,

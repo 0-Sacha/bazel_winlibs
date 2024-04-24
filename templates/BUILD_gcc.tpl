@@ -159,8 +159,8 @@ filegroup(
 filegroup(
     name = "toolchains_bins",
     srcs = glob([
-        "bin/**",
-        "x86_64-w64-mingw32/bin/**",
+        "x86_64-w64-mingw32/bin/*%{extention}",
+        "bin/*%{extention}",
     ]),
 )
 
@@ -207,6 +207,7 @@ filegroup(
 filegroup(
     name = "compiler_components",
     srcs = [
+<<<<<<< Updated upstream
         "cc",
         "cxx",
         "cpp",
@@ -219,9 +220,24 @@ filegroup(
         "strip",
         "as",
         "size",
+=======
+        ":cpp",
+        ":cc",
+        ":cxx",
+        ":cov",
+        ":ar",
+        ":ld",
+        ":nm",
+        ":objcopy",
+        ":objdump",
+        ":strip",
+        ":as",
+        ":size",
+        ":dwp",
+>>>>>>> Stashed changes
     ],
-)
 
+)
 
 filegroup(
     name = "dbg",
