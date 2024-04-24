@@ -16,6 +16,20 @@ cc_toolchain_config(
         "cc": "clang",
         "cxx": "clang++",
         "cov": "llvm-cov",
+        "ar": "llvm-ar",
+        "strip": "llvm-strip",
+        "size": "llvm-size",
+        "nm": "llvm-nm",
+        "as": "llvm-as",
+        "objcopy": "llvm-objcopy",
+        "objdump": "llvm-objdump",
+        "ar": "llvm-ar",
+        "strip": "llvm-strip",
+        "size": "llvm-size",
+        "nm": "llvm-nm",
+        "as": "llvm-as",
+        "objcopy": "llvm-objcopy",
+        "objdump": "llvm-objdump",
     },
     toolchain_bins = "%{compiler_package}:compiler_components",
     artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
@@ -170,7 +184,6 @@ filegroup(
     name = "compiler_files",
     srcs = [
         ":compiler_pieces",
-        ":compiler_pieces",
         ":cpp",
         ":cc",
         ":cxx",
@@ -180,7 +193,6 @@ filegroup(
 filegroup(
     name = "linker_files",
     srcs = [
-        ":compiler_pieces",
         ":compiler_pieces",
         ":cc",
         ":cxx",
@@ -192,7 +204,6 @@ filegroup(
 filegroup(
     name = "coverage_files",
     srcs = [
-        ":compiler_pieces",
         ":compiler_pieces",
         ":cc",
         ":cxx",
@@ -223,7 +234,8 @@ filegroup(
 
 filegroup(
     name = "dbg",
-    srcs = glob(["bin/lldb%{extention}"]),
+    srcs = ["bin/lldb%{extention}"],
+    srcs = ["bin/lldb%{extention}"],
 )
 
 filegroup(

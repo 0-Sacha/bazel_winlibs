@@ -5,27 +5,27 @@ package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "cpp",
-    srcs = glob(["bin/clang-cpp%{extention}"]),
+    srcs = ["bin/clang-cpp%{extention}"],
 )
 
 filegroup(
     name = "cc",
-    srcs = glob(["bin/clang%{extention}"]),
+    srcs = ["bin/clang%{extention}"],
 )
 
 filegroup(
     name = "cxx",
-    srcs = glob(["bin/clang++%{extention}"]),
+    srcs = ["bin/clang++%{extention}"],
 )
 
 filegroup(
     name = "cov",
-    srcs = glob(["bin/llvm-cov%{extention}"]),
+    srcs = ["bin/llvm-cov%{extention}"],
 )
 
 filegroup(
     name = "ar",
-    srcs = glob(["bin/llvm-ar%{extention}"]),
+    srcs = ["bin/llvm-ar%{extention}"],
 )
 
 filegroup(
@@ -35,32 +35,32 @@ filegroup(
 
 filegroup(
     name = "nm",
-    srcs = glob(["bin/llvm-nm%{extention}"]),
+    srcs = ["bin/llvm-nm%{extention}"],
 )
 
 filegroup(
     name = "objcopy",
-    srcs = glob(["bin/llvm-objcopy%{extention}"]),
+    srcs = ["bin/llvm-objcopy%{extention}"],
 )
 
 filegroup(
     name = "objdump",
-    srcs = glob(["bin/llvm-objdump%{extention}"]),
+    srcs = ["bin/llvm-objdump%{extention}"],
 )
 
 filegroup(
     name = "strip",
-    srcs = glob(["bin/llvm-strip%{extention}"]),
+    srcs = ["bin/llvm-strip%{extention}"],
 )
 
 filegroup(
     name = "as",
-    srcs = glob(["bin/llvm-as%{extention}"]),
+    srcs = ["bin/llvm-as%{extention}"],
 )
 
 filegroup(
     name = "size",
-    srcs = glob(["bin/llvm-size%{extention}"]),
+    srcs = ["bin/llvm-size%{extention}"],
 )
 
 filegroup(

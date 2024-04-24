@@ -27,8 +27,8 @@ cc_toolchain_config(
         }
     ),
     cxx_builtin_include_directories = [
-        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include",
-        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/{gcc_version}/include-fixed",
+        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include",
+        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include-fixed",
         "%{compiler_package_path}x86_64-w64-mingw32/include",
         "%{compiler_package_path}include",
     ],
@@ -40,7 +40,7 @@ cc_toolchain_config(
     defines = %{defines},
     includedirs = %{includedirs},
     linkdirs = [
-        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/{gcc_version}",
+        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/%{gcc_version}",
         "%{compiler_package_path}x86_64-w64-mingw32/lib",
     ] + %{linkdirs},
 )
@@ -207,20 +207,6 @@ filegroup(
 filegroup(
     name = "compiler_components",
     srcs = [
-<<<<<<< Updated upstream
-        "cc",
-        "cxx",
-        "cpp",
-        "cov",
-        "ar",
-        "ld",
-        "nm",
-        "objcopy",
-        "objdump",
-        "strip",
-        "as",
-        "size",
-=======
         ":cpp",
         ":cc",
         ":cxx",
@@ -234,7 +220,6 @@ filegroup(
         ":as",
         ":size",
         ":dwp",
->>>>>>> Stashed changes
     ],
 
 )
