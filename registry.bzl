@@ -1,7 +1,7 @@
-"""MinGW Archives
+"""MinGW registry
 """
 
-load("@bazel_utilities//toolchains:archives.bzl", "gen_archives_registry")
+load("@bazel_utilities//toolchains:registry.bzl", "gen_archives_registry")
 
 WINLIBS_MINGW_13_2_0POSIX = {
     "toolchain": "MinGW",
