@@ -157,6 +157,8 @@ def winlibs_mingw_toolchain(
         
         local_download = True,
         registry = WINLIBS_MINGW_REGISTRY,
+
+        auto_register_toolchain = True
     ):
     """MinGW Toolchain
 
@@ -183,6 +185,8 @@ def winlibs_mingw_toolchain(
 
         local_download: wether the archive should be downloaded in the same repository (True) or in its own repo
         registry: The arm registry to use, to allow close environement to provide their own mirroir/url
+
+        auto_register_toolchain: If the toolchain is registered to bazel using `register_toolchains`
     """
     compiler_package_name = ""
 
@@ -225,5 +229,6 @@ def winlibs_mingw_toolchain(
         flags_packed = flags_packed,
     )
 
-    compiler_version = archive["details"]["{}_version".format(compiler)]
-    native.register_toolchains("@{}//:toolchain_winlibs_mingw_{}_{}".format(name, compiler, compiler_version))
+    if auto_register_toolchain:
+        compiler_version = archive["details"]["{}_version".format(compiler)]
+        native.register_toolchains("@{}//:toolchain_winlibs_mingw_{}_{}".format(name, compiler, compiler_version))
