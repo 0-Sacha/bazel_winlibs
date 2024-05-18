@@ -20,20 +20,21 @@ cc_toolchain_config(
     },
     toolchain_bins = "%{compiler_package}:compiler_components",
     artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
-    flags = dicts.add(
-        %{flags_packed},
-        {
-            "##linkcopts,copts":  "-no-canonical-prefixes,-fno-canonical-system-headers"
-        }
-    ),
+    flags = %{flags_packed},
     cxx_builtin_include_directories = [
         "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include",
         "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include-fixed",
         "%{compiler_package_path}x86_64-w64-mingw32/include",
+        "%{compiler_package_path}include/c++/%{gcc_version}",
+        "%{compiler_package_path}include/c++/%{gcc_version}/x86_64-w64-mingw32/bits/",
+        "%{compiler_package_path}include/c++/%{gcc_version}/pstl",
         "%{compiler_package_path}include",
     ],
 
-    copts = %{copts},
+    copts = [
+        "-no-canonical-prefixes",
+        "-fno-canonical-system-headers"
+    ] + %{copts},
     conlyopts = %{conlyopts},
     cxxopts = %{cxxopts},
     linkopts = %{linkopts},

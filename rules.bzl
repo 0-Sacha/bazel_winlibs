@@ -120,6 +120,7 @@ _winlibs_mingw_toolchain = repository_rule(
 
         'target_name': attr.string(default = "local"),
         'target_cpu': attr.string(default = ""),
+        'exec_compatible_with': attr.string_list(default = []),
         'target_compatible_with': attr.string_list(default = []),
 
         'copts': attr.string_list(default = []),
