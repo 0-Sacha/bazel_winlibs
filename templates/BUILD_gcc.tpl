@@ -1,26 +1,37 @@
-""
+"""
+"""
 
-load("@bazel_winlibs_mingw//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@bazel_winlibs_mingw//:artifacts_patterns.bzl", "MINGW_ATTIFACTS_PATTERNS")
 
 package(default_visibility = ["//visibility:public"])
 
 cc_toolchain_config(
     name = "cc_toolchain_config_%{toolchain_id}",
     toolchain_identifier = "%{toolchain_id}",
-    host_name = "%{host_name}",
-    target_name = "%{target_name}",
-    target_cpu = "%{target_cpu}",
-    compiler = {
-        "name": "gcc",
-        "cc": "gcc",
-        "cxx": "g++",
-        "cov": "gcov",
+
+    compiler_type = "gcc",
+
+    toolchain_bins = {
+        "%{compiler_package}:cpp": "cpp",
+        "%{compiler_package}:cc": "cc",
+        "%{compiler_package}:cxx": "cxx",
+        "%{compiler_package}:as": "as",
+        "%{compiler_package}:ar": "ar",
+        "%{compiler_package}:ld": "ld",
+
+        "%{compiler_package}:objcopy": "objcopy",
+        "%{compiler_package}:strip": "strip",
+
+        "%{compiler_package}:cov": "cov",
+
+        "%{compiler_package}:size": "size",
+        "%{compiler_package}:nm": "nm",
+        "%{compiler_package}:objdump": "objdump",
+        "%{compiler_package}:dwp": "dwp",
+        "%{compiler_package}:dbg": "dbg",
     },
-    toolchain_bins = "%{compiler_package}:compiler_components",
-    artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
-    flags = %{flags_packed},
+    
     cxx_builtin_include_directories = [
         "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include",
         "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include-fixed",
@@ -31,10 +42,7 @@ cc_toolchain_config(
         "%{compiler_package_path}include",
     ],
 
-    copts = [
-        "-no-canonical-prefixes",
-        "-fno-canonical-system-headers"
-    ] + %{copts},
+    copts = %{copts},
     conlyopts = %{conlyopts},
     cxxopts = %{cxxopts},
     linkopts = %{linkopts},
@@ -44,6 +52,10 @@ cc_toolchain_config(
         "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/%{gcc_version}",
         "%{compiler_package_path}x86_64-w64-mingw32/lib",
     ] + %{linkdirs},
+
+    toolchain_libs = %{toolchain_libs},
+
+    artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
 )
 
 cc_toolchain(
@@ -51,16 +63,22 @@ cc_toolchain(
     toolchain_identifier = "%{toolchain_id}",
     toolchain_config = ":cc_toolchain_config_%{toolchain_id}",
     
-    all_files = "%{compiler_package}:compiler_pieces",
+    all_files = "%{compiler_package}:all_files",
     compiler_files = "%{compiler_package}:compiler_files",
     linker_files = "%{compiler_package}:linker_files",
     ar_files = "%{compiler_package}:ar",
     as_files = "%{compiler_package}:as",
+    
     objcopy_files = "%{compiler_package}:objcopy",
     strip_files = "%{compiler_package}:strip",
-    dwp_files = "%{compiler_package}:dwp",
+    
     coverage_files = "%{compiler_package}:coverage_files",
-    supports_param_files = 0
+    
+    dwp_files = "%{compiler_package}:dwp",
+
+    # dynamic_runtime_lib
+    # static_runtime_lib
+    # supports_param_files
 )
 
 toolchain(
@@ -77,15 +95,34 @@ filegroup(
     name = "cpp",
     srcs = ["bin/cpp%{extention}"],
 )
-
 filegroup(
     name = "cc",
     srcs = ["bin/gcc%{extention}"],
 )
-
 filegroup(
     name = "cxx",
     srcs = ["bin/g++%{extention}"],
+)
+filegroup(
+    name = "as",
+    srcs = ["bin/as%{extention}"],
+)
+filegroup(
+    name = "ar",
+    srcs = ["bin/ar%{extention}"],
+)
+filegroup(
+    name = "ld",
+    srcs = ["bin/ld%{extention}"],
+)
+
+filegroup(
+    name = "objcopy",
+    srcs = ["bin/objcopy%{extention}"],
+)
+filegroup(
+    name = "strip",
+    srcs = ["bin/strip%{extention}"],
 )
 
 filegroup(
@@ -94,53 +131,30 @@ filegroup(
 )
 
 filegroup(
-    name = "ar",
-    srcs = ["bin/ar%{extention}"],
+    name = "size",
+    srcs = ["bin/size%{extention}"],
 )
-
-filegroup(
-    name = "ld",
-    srcs = ["bin/ld%{extention}"],
-)
-
 filegroup(
     name = "nm",
     srcs = ["bin/nm%{extention}"],
 )
-
-filegroup(
-    name = "objcopy",
-    srcs = ["bin/objcopy%{extention}"],
-)
-
 filegroup(
     name = "objdump",
     srcs = ["bin/objdump%{extention}"],
 )
-
-filegroup(
-    name = "strip",
-    srcs = ["bin/strip%{extention}"],
-)
-
-filegroup(
-    name = "as",
-    srcs = ["bin/as%{extention}"],
-)
-
-filegroup(
-    name = "size",
-    srcs = ["bin/size%{extention}"],
-)
-
 filegroup(
     name = "dwp",
-    srcs = [],
+    srcs = ["bin/dwp%{extention}"],
+)
+
+filegroup(
+    name = "dbg",
+    srcs = ["bin/gdb%{extention}"],
 )
 
 
 filegroup(
-    name = "compiler_includes",
+    name = "toolchain_includes",
     srcs = glob([
         "lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include/**",
         "lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include-fixed/**",
@@ -150,7 +164,7 @@ filegroup(
 )
 
 filegroup(
-    name = "compiler_libs",
+    name = "toolchain_libs",
     srcs = glob([
         "lib/gcc/x86_64-w64-mingw32/%{gcc_version}/*",
         "x86_64-w64-mingw32/lib/*",
@@ -159,25 +173,27 @@ filegroup(
 )
 
 filegroup(
-    name = "toolchains_bins",
+    name = "toolchain_bins",
     srcs = glob([
         "x86_64-w64-mingw32/bin/*%{extention}",
         "bin/*%{extention}",
     ]),
 )
 
+
 filegroup(
-    name = "compiler_pieces",
+    name = "all_files",
     srcs = [
-        ":compiler_includes",
-        ":compiler_libs",
+        ":toolchain_includes",
+        ":toolchain_libs",
+        ":toolchain_bins",
     ],
 )
 
 filegroup(
     name = "compiler_files",
     srcs = [
-        ":compiler_pieces",
+        ":toolchain_includes",
         ":cpp",
         ":cc",
         ":cxx",
@@ -187,7 +203,7 @@ filegroup(
 filegroup(
     name = "linker_files",
     srcs = [
-        ":compiler_pieces",
+        ":toolchain_libs",
         ":cc",
         ":cxx",
         ":ld",
@@ -198,11 +214,12 @@ filegroup(
 filegroup(
     name = "coverage_files",
     srcs = [
-        ":compiler_pieces",
+        ":toolchain_includes",
+        ":toolchain_libs",
         ":cc",
         ":cxx",
-        ":cov",
         ":ld",
+        ":cov",
     ],
 )
 
@@ -212,28 +229,20 @@ filegroup(
         ":cpp",
         ":cc",
         ":cxx",
-        ":cov",
         ":ar",
         ":ld",
-        ":nm",
+
         ":objcopy",
-        ":objdump",
         ":strip",
+
+        ":cov",
+
+        ":nm",
+        ":objdump",
         ":as",
         ":size",
         ":dwp",
-    ],
-
-)
-
-filegroup(
-    name = "dbg",
-    srcs = ["bin/gdb%{extention}"],
-)
-
-filegroup(
-    name = "compiler_extras",
-    srcs = [
-        "dbg",
+        
+        ":dbg",
     ],
 )
