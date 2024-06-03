@@ -63,18 +63,16 @@ cc_toolchain(
     toolchain_identifier = "%{toolchain_id}",
     toolchain_config = ":cc_toolchain_config_%{toolchain_id}",
     
-    all_files = "%{compiler_package}:all_files",
-    compiler_files = "%{compiler_package}:compiler_files",
-    linker_files = "%{compiler_package}:linker_files",
-    ar_files = "%{compiler_package}:ar",
-    as_files = "%{compiler_package}:as",
-    
-    objcopy_files = "%{compiler_package}:objcopy",
-    strip_files = "%{compiler_package}:strip",
-    
-    coverage_files = "%{compiler_package}:coverage_files",
-    
-    dwp_files = "%{compiler_package}:dwp",
+    # TODO: Current fix for Sandboxed build # "%{compiler_package}:all_files",
+    all_files = ":toolchain_every_files",
+    compiler_files = ":toolchain_every_files",
+    linker_files = ":toolchain_every_files",
+    ar_files = ":toolchain_every_files",
+    as_files = ":toolchain_every_files",
+    objcopy_files = ":toolchain_every_files",
+    strip_files = ":toolchain_every_files",
+    dwp_files = ":toolchain_every_files",
+    coverage_files = ":toolchain_every_files",
 
     # dynamic_runtime_lib
     # static_runtime_lib
@@ -88,6 +86,15 @@ toolchain(
 
     exec_compatible_with = %{exec_compatible_with},
     target_compatible_with = %{target_compatible_with},
+)
+
+
+filegroup(
+    name = "toolchain_every_files",
+    srcs = [
+        ":toolchain_internal_every_files",
+        "%{toolchain_extras_filegroup}",
+    ]
 )
 
 
@@ -152,6 +159,11 @@ filegroup(
     srcs = ["bin/gdb%{extention}"],
 )
 
+
+filegroup(
+    name = "toolchain_internal_every_files",
+    srcs = glob(["**"]),
+)
 
 filegroup(
     name = "toolchain_includes",
