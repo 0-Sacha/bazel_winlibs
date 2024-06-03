@@ -66,6 +66,11 @@ filegroup(
 
 
 filegroup(
+    name = "toolchain_internal_every_files",
+    srcs = glob(["**"]),
+)
+
+filegroup(
     name = "toolchain_includes",
     srcs = glob([
         "lib/clang/%{clang_version}/include/**",

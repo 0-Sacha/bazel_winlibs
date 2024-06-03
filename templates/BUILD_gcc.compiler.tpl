@@ -66,6 +66,11 @@ filegroup(
 
 
 filegroup(
+    name = "toolchain_internal_every_files",
+    srcs = glob(["**"]),
+)
+
+filegroup(
     name = "toolchain_includes",
     srcs = glob([
         "lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include/**",
