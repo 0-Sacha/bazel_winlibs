@@ -2,6 +2,7 @@
 
 load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "HOST_EXTENTION")
 load("@bazel_utilities//toolchains:registry.bzl", "get_archive_from_registry")
+load("@bazel_utilities//toolchains:utils.bzl", "forward_envars")
 load("@bazel_winlibs_mingw//:registry.bzl", "WINLIBS_MINGW_REGISTRY")
 
 def _winlibs_mingw_compiler_archive_impl(rctx):
@@ -90,6 +91,8 @@ def _winlibs_mingw_impl(rctx):
         "%{toolchain_libs}": json.encode(rctx.attr.toolchain_libs),
 
         "%{toolchain_extras_filegroup}": toolchain_extras_filegroup,
+
+        "%{envars}": json.encode(forward_envars(rctx)),
     }
     rctx.template(
         "BUILD",

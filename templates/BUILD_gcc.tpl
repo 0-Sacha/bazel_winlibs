@@ -56,6 +56,8 @@ cc_toolchain_config(
     toolchain_libs = %{toolchain_libs},
 
     artifacts_patterns_packed = MINGW_ATTIFACTS_PATTERNS["%{host_name}"],
+
+    envars = %{envars},
 )
 
 cc_toolchain(
