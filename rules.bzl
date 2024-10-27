@@ -80,7 +80,12 @@ def _winlibs_impl(rctx):
         "%{includedirs}": json.encode(rctx.attr.includedirs),
         "%{linkdirs}": json.encode(rctx.attr.linkdirs),
         "%{linklibs}": json.encode(rctx.attr.linklibs),
-
+        # dbg / opt
+        "%{dbg_copts}": json.encode(rctx.attr.dbg_copts),
+        "%{dbg_linkopts}": json.encode(rctx.attr.dbg_linkopts),
+        "%{opt_copts}": json.encode(rctx.attr.opt_copts),
+        "%{opt_linkopts}": json.encode(rctx.attr.opt_linkopts),
+        
         "%{toolchain_extras_filegroups}": json.encode(filegroup_translate_to_starlark(rctx.attr.toolchain_extras_filegroups), ),
     }
     rctx.template(
@@ -119,6 +124,11 @@ _winlibs_toolchain = repository_rule(
         'includedirs': attr.string_list(default = []),
         'linkdirs': attr.string_list(default = []),
         'linklibs': attr.string_list(default = []),
+        # dbg / opt
+        'dbg_copts': attr.string_list(default = []),
+        'dbg_linkopts': attr.string_list(default = []),
+        'opt_copts': attr.string_list(default = []),
+        'opt_linkopts': attr.string_list(default = []),
 
         'toolchain_extras_filegroups': attr.label_list(default = []),
 
@@ -141,6 +151,11 @@ def winlibs_toolchain(
         includedirs = [],
         linkdirs = [],
         linklibs = [],
+        # dbg / opt
+        dbg_copts = [],
+        dbg_linkopts = [],
+        opt_copts = [],
+        opt_linkopts = [],
 
         toolchain_extras_filegroups = [],
         
@@ -166,6 +181,12 @@ def winlibs_toolchain(
         includedirs: includedirs
         linkdirs: linkdirs
         linklibs: linklibs
+        # dbg / opt
+        linklibs: linklibs
+        dbg_copts: dbg_copts
+        dbg_linkopts: dbg_linkopts
+        opt_copts: opt_copts
+        opt_linkopts: opt_linkopts
 
         toolchain_extras_filegroups: filegroup added to the cc_toolchain rule to get access to thoses files when sandboxed
         
@@ -191,6 +212,11 @@ def winlibs_toolchain(
         includedirs = includedirs,
         linkdirs = linkdirs,
         linklibs = linklibs,
+        # dbg / opt
+        dbg_copts = dbg_copts,
+        dbg_linkopts = dbg_linkopts,
+        opt_copts = opt_copts,
+        opt_linkopts = opt_linkopts,
 
         toolchain_extras_filegroups = toolchain_extras_filegroups,
 
@@ -220,9 +246,10 @@ def _winlibs_toolchain_extension_impl(module_ctx):
             winlibs_toolchain(
                 name = toolchain.name,
                 winlibs_version = toolchain.winlibs_version,
-                compiler_archive_package = "@archive_winlibs-" + toolchain.winlibs_version,
+                
                 exec_compatible_with = toolchain.exec_compatible_with,
                 target_compatible_with = toolchain.target_compatible_with,
+
                 copts = toolchain.copts,
                 conlyopts = toolchain.conlyopts,
                 cxxopts = toolchain.cxxopts,
@@ -231,7 +258,15 @@ def _winlibs_toolchain_extension_impl(module_ctx):
                 includedirs = toolchain.includedirs,
                 linkdirs = toolchain.linkdirs,
                 linklibs = toolchain.linklibs,
+                # dbg / opt
+                dbg_copts = toolchain.dbg_copts,
+                dbg_linkopts = toolchain.dbg_linkopts,
+                opt_copts = toolchain.opt_copts,
+                opt_linkopts = toolchain.opt_linkopts,
+
                 toolchain_extras_filegroups = toolchain.toolchain_extras_filegroups,
+
+                compiler_archive_package = "@archive_winlibs-" + toolchain.winlibs_version,
             )
     
 winlibs_toolchain_extension = module_extension(
@@ -254,6 +289,11 @@ winlibs_toolchain_extension = module_extension(
             'includedirs': attr.string_list(default = []),
             'linkdirs': attr.string_list(default = []),
             'linklibs': attr.string_list(default = []),
+            # dbg / opt
+            'dbg_copts': attr.string_list(default = []),
+            'dbg_linkopts': attr.string_list(default = []),
+            'opt_copts': attr.string_list(default = []),
+            'opt_linkopts': attr.string_list(default = []),
 
             'toolchain_extras_filegroups': attr.label_list(default = []),
         }),
