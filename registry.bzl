@@ -3,7 +3,7 @@
 
 load("@bazel_utilities//toolchains:registry.bzl", "gen_archives_registry")
 
-WINLIBS_MINGW_13_2_0POSIX = {
+WINLIBS_13_2_0POSIX = {
     "toolchain": "MinGW",
     "version": "13.2.0posix",
     "version-short": "13.2",
@@ -18,6 +18,6 @@ WINLIBS_MINGW_13_2_0POSIX = {
     }
 }
 
-WINLIBS_MINGW_REGISTRY = gen_archives_registry([
-    WINLIBS_MINGW_13_2_0POSIX
+WINLIBS_REGISTRY = gen_archives_registry([
+    WINLIBS_13_2_0POSIX
 ])
