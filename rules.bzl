@@ -1,80 +1,72 @@
 ""
 
-load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "HOST_EXTENTION")
+load("@bazel_skylib//lib:sets.bzl", "sets")
+load("@bazel_utilities//toolchains:extras_filegroups.bzl", "filegroup_translate_to_starlark")
+load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "HOST_EXTENSION")
 load("@bazel_utilities//toolchains:registry.bzl", "get_archive_from_registry")
-load("@bazel_winlibs_mingw//:registry.bzl", "WINLIBS_MINGW_REGISTRY")
+load("@bazel_winlibs//:registry.bzl", "WINLIBS_REGISTRY")
 
-def _winlibs_mingw_compiler_archive_impl(rctx):
+def _winlibs_compiler_archive_impl(rctx):
     host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
     
+    registry = json.decode(rctx.attr.registry_json)
+    archive = get_archive_from_registry(registry, "MinGW", rctx.attr.winlibs_version)
+
     substitutions = {
         "%{rctx_name}": rctx.name,
         "%{rctx_path}": "external/{}/".format(rctx.name),
-        "%{extention}": HOST_EXTENTION[host_os],
+        "%{extention}": HOST_EXTENSION[host_os],
         "%{host_name}": host_name,
-        "%{clang_version}": rctx.attr.clang_version,
-        "%{gcc_version}": rctx.attr.gcc_version,
+        "%{clang_version}": archive["details"]["clang_version"],
+        "%{gcc_version}": archive["details"]["gcc_version"],
     }
     rctx.template(
-        "BUILD",
-        Label("//templates:BUILD_{}.compiler.tpl".format(rctx.attr.compiler)),
+        "BUILD.bazel",
+        Label("//templates:BUILD.compiler.bazel.tpl"),
         substitutions
     )
 
-    archives = json.decode(rctx.attr.archives)
-    archive = archives[host_name]
-
+    host_archive = archive["archives"][host_name]
     rctx.download_and_extract(
-        url = archive["url"],
-        sha256 = archive["sha256"],
-        stripPrefix = archive["strip_prefix"],
+        url = host_archive["url"],
+        sha256 = host_archive["sha256"],
+        stripPrefix = host_archive["strip_prefix"],
     )
 
-winlibs_mingw_compiler_archive = repository_rule(
-    implementation = _winlibs_mingw_compiler_archive_impl,
+winlibs_compiler_archive = repository_rule(
+    implementation = _winlibs_compiler_archive_impl,
     attrs = {
-        'compiler': attr.string(mandatory = True),
-        'clang_version': attr.string(mandatory = True),
-        'gcc_version': attr.string(mandatory = True),
-        'archives': attr.string(mandatory = True),
+        'winlibs_version': attr.string(default = "latest"),
+        'registry_json': attr.string(mandatory = True),
     },
-    local = False,
 )
 
 
-def _winlibs_mingw_impl(rctx):
+def _winlibs_impl(rctx):
     host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
 
-    toolchain_id = ""
-    if rctx.attr.compiler == "gcc":
-        toolchain_id = "winlibs_mingw_{}_{}".format(rctx.attr.compiler, rctx.attr.gcc_version)
-    elif rctx.attr.compiler == "clang":
-        toolchain_id = "winlibs_mingw_{}_{}".format(rctx.attr.compiler, rctx.attr.clang_version)
-    else:
-        print("Compiler {} not supported by MinGW".format(rctx.attr.compiler)) # buildifier: disable=print
-        
+    registry = json.decode(rctx.attr.registry_json)
+    archive = get_archive_from_registry(registry, "MinGW", rctx.attr.winlibs_version)
+
     toolchain_path = "external/{}/".format(rctx.name)
     compiler_package = ""
+    compiler_full_package = "@@{}//".format(rctx.name)
     compiler_package_path = toolchain_path
-    if rctx.attr.local_download == False:
-        compiler_package = "@{}//".format(rctx.attr.compiler_package_name)
-        compiler_package_path = "external/{}/".format(rctx.attr.compiler_package_name)
-
-    toolchain_extras_filegroup = "@{}//{}:{}".format(
-        rctx.attr.toolchain_extras_filegroup.repo_name,
-        rctx.attr.toolchain_extras_filegroup.package,
-        rctx.attr.toolchain_extras_filegroup.name,
-    )
+    if rctx.attr.compiler_archive_package != None and rctx.attr.compiler_archive_package != "":
+        compiler_package = "@@{}//".format(rctx.attr.compiler_archive_package.repo_name)
+        compiler_full_package = compiler_package
+        compiler_package_path = rctx.attr.compiler_archive_package.workspace_root + "/"
 
     substitutions = {
         "%{rctx_name}": rctx.name,
-        "%{extention}": HOST_EXTENTION[host_os],
+        "%{extention}": HOST_EXTENSION[host_os],
         "%{toolchain_path}": toolchain_path,
         "%{host_name}": host_name,
-        "%{toolchain_id}": toolchain_id,
-        "%{clang_version}": rctx.attr.clang_version,
-        "%{gcc_version}": rctx.attr.gcc_version,
+        "%{toolchain_id}": "winlibs_{}".format(rctx.attr.winlibs_version),
+        "%{clang_version}": archive["details"]["clang_version"],
+        "%{gcc_version}": archive["details"]["gcc_version"],
         "%{compiler_package}": compiler_package,
+        "%{compiler_full_package}": compiler_full_package,
         "%{compiler_package_path}": compiler_package_path,
         
         "%{exec_compatible_with}": json.encode(rctx.attr.exec_compatible_with),
@@ -87,13 +79,13 @@ def _winlibs_mingw_impl(rctx):
         "%{defines}": json.encode(rctx.attr.defines),
         "%{includedirs}": json.encode(rctx.attr.includedirs),
         "%{linkdirs}": json.encode(rctx.attr.linkdirs),
-        "%{toolchain_libs}": json.encode(rctx.attr.toolchain_libs),
+        "%{linklibs}": json.encode(rctx.attr.linklibs),
 
-        "%{toolchain_extras_filegroup}": toolchain_extras_filegroup,
+        "%{toolchain_extras_filegroups}": json.encode(filegroup_translate_to_starlark(rctx.attr.toolchain_extras_filegroups), ),
     }
     rctx.template(
-        "BUILD",
-        Label("//templates:BUILD_{}.tpl".format(rctx.attr.compiler)),
+        "BUILD.bazel",
+        Label("//templates:BUILD.bazel.tpl"),
         substitutions
     )
     rctx.template(
@@ -102,26 +94,19 @@ def _winlibs_mingw_impl(rctx):
         substitutions
     )
 
-    archives = json.decode(rctx.attr.archives)
-    archive = archives[host_name]
-
-    if rctx.attr.local_download:
+    if rctx.attr.compiler_archive_package == None or rctx.attr.compiler_archive_package == "":
+        host_archive = archive["archives"][host_name]
         rctx.download_and_extract(
-            url = archive["url"],
-            sha256 = archive["sha256"],
-            stripPrefix = archive["strip_prefix"],
+            url = host_archive["url"],
+            sha256 = host_archive["sha256"],
+            stripPrefix = host_archive["strip_prefix"],
         )
 
-_winlibs_mingw_toolchain = repository_rule(
+_winlibs_toolchain = repository_rule(
+    implementation = _winlibs_impl,
     attrs = {
-        'winlibs_mingw_version': attr.string(default = "latest"),
-        'compiler': attr.string(mandatory = True),
-        'clang_version': attr.string(mandatory = True),
-        'gcc_version': attr.string(mandatory = True),
-
-        'local_download': attr.bool(default = True),
-        'archives': attr.string(mandatory = True),
-        'compiler_package_name': attr.string(mandatory = True),
+        'winlibs_version': attr.string(default = "latest"),
+        'registry_json': attr.string(mandatory = True),
 
         'exec_compatible_with': attr.string_list(default = []),
         'target_compatible_with': attr.string_list(default = []),
@@ -133,18 +118,17 @@ _winlibs_mingw_toolchain = repository_rule(
         'defines': attr.string_list(default = []),
         'includedirs': attr.string_list(default = []),
         'linkdirs': attr.string_list(default = []),
-        'toolchain_libs': attr.string_list(default = []),
+        'linklibs': attr.string_list(default = []),
 
-        'toolchain_extras_filegroup': attr.label(),
+        'toolchain_extras_filegroups': attr.label_list(default = []),
+
+        'compiler_archive_package': attr.label(default = None),
     },
-    local = False,
-    implementation = _winlibs_mingw_impl,
 )
 
-def winlibs_mingw_toolchain(
+def winlibs_toolchain(
         name,
-        winlibs_mingw_version = "latest",
-        compiler = "gcc",
+        winlibs_version = "latest",
 
         exec_compatible_with = [],
         target_compatible_with = [],
@@ -156,14 +140,12 @@ def winlibs_mingw_toolchain(
         defines = [],
         includedirs = [],
         linkdirs = [],
-        toolchain_libs = [],
+        linklibs = [],
 
-        toolchain_extras_filegroup = "@bazel_utilities//:empty",
+        toolchain_extras_filegroups = [],
         
-        local_download = True,
-        registry = WINLIBS_MINGW_REGISTRY,
-
-        auto_register_toolchain = True
+        compiler_archive_package = None,
+        registry = WINLIBS_REGISTRY,
     ):
     """MinGW Toolchain
 
@@ -171,8 +153,7 @@ def winlibs_mingw_toolchain(
 
     Args:
         name: Name of the repo that will be created
-        winlibs_mingw_version: The MinGW archive version
-        compiler: The compiler to use: `gcc` or `clang` (default=`gcc`)
+        winlibs_version: The MinGW archive version
 
         exec_compatible_with: The exec_compatible_with list for the toolchain
         target_compatible_with: The target_compatible_with list for the toolchain
@@ -184,40 +165,20 @@ def winlibs_mingw_toolchain(
         defines: defines
         includedirs: includedirs
         linkdirs: linkdirs
-        toolchain_libs: toolchain_libs
+        linklibs: linklibs
 
-        toolchain_extras_filegroup: filegroup added to the cc_toolchain rule to get access to thoses files when sandboxed
+        toolchain_extras_filegroups: filegroup added to the cc_toolchain rule to get access to thoses files when sandboxed
         
-        local_download: wether the archive should be downloaded in the same repository (True) or in its own repo
+        compiler_archive_package: The winlibs archive to use. If none are provided, one will be defined automatically
         registry: The arm registry to use, to allow close environement to provide their own mirroir/url
-
-        auto_register_toolchain: If the toolchain is registered to bazel using `register_toolchains`
     """
-    compiler_package_name = ""
+    if registry == None:
+        registry = WINLIBS_REGISTRY
 
-    archive = get_archive_from_registry(registry, "MinGW", winlibs_mingw_version)
-    compiler_version = archive["details"]["{}_version".format(compiler)]
-
-    if local_download == False:
-        compiler_package_name = "archive_winlibs_mingw_{}_{}".format(compiler, compiler_version)
-        winlibs_mingw_compiler_archive(
-            name = compiler_package_name,
-            compiler = compiler,
-            clang_version = archive["details"]["clang_version"],
-            gcc_version = archive["details"]["gcc_version"],
-            archives = json.encode(archive["archives"]),
-        )
-
-    _winlibs_mingw_toolchain(
+    _winlibs_toolchain(
         name = name,
-        winlibs_mingw_version = winlibs_mingw_version,
-        compiler = compiler,
-        clang_version = archive["details"]["clang_version"],
-        gcc_version = archive["details"]["gcc_version"],
-
-        local_download = local_download,
-        archives = json.encode(archive["archives"]),
-        compiler_package_name = compiler_package_name,
+        winlibs_version = winlibs_version,
+        registry_json = json.encode(registry),
 
         exec_compatible_with = exec_compatible_with,
         target_compatible_with = target_compatible_with,
@@ -229,11 +190,72 @@ def winlibs_mingw_toolchain(
         defines = defines,
         includedirs = includedirs,
         linkdirs = linkdirs,
-        toolchain_libs = toolchain_libs,
+        linklibs = linklibs,
 
-        toolchain_extras_filegroup = toolchain_extras_filegroup,
+        toolchain_extras_filegroups = toolchain_extras_filegroups,
+
+        compiler_archive_package = compiler_archive_package,
     )
 
-    if auto_register_toolchain:
-        compiler_version = archive["details"]["{}_version".format(compiler)]
-        native.register_toolchains("@{}//:toolchain_winlibs_mingw_{}_{}".format(name, compiler, compiler_version))
+
+def _winlibs_toolchain_extension_impl(module_ctx):
+    winlibs_toolchain_versions_list = [
+        toolchain.winlibs_version
+        for mod in module_ctx.modules 
+        for toolchain in mod.tags.winlibs_toolchain
+    ]
+    if len(winlibs_toolchain_versions_list) == 0:
+        winlibs_toolchain_versions_list.append("latest")
+    winlibs_toolchain_versions_list = sets.to_list(sets.make(winlibs_toolchain_versions_list))
+    winlibs_registry = WINLIBS_REGISTRY
+    for version in winlibs_toolchain_versions_list:
+        winlibs_compiler_archive(
+            name = "archive_winlibs-" + version,
+            winlibs_version = version,
+            registry_json = json.encode(winlibs_registry),
+        )
+    
+    for mod in module_ctx.modules:
+        for toolchain in mod.tags.winlibs_toolchain:
+            winlibs_toolchain(
+                name = toolchain.name,
+                winlibs_version = toolchain.winlibs_version,
+                compiler_archive_package = "@archive_winlibs-" + toolchain.winlibs_version,
+                exec_compatible_with = toolchain.exec_compatible_with,
+                target_compatible_with = toolchain.target_compatible_with,
+                copts = toolchain.copts,
+                conlyopts = toolchain.conlyopts,
+                cxxopts = toolchain.cxxopts,
+                linkopts = toolchain.linkopts,
+                defines = toolchain.defines,
+                includedirs = toolchain.includedirs,
+                linkdirs = toolchain.linkdirs,
+                linklibs = toolchain.linklibs,
+                toolchain_extras_filegroups = toolchain.toolchain_extras_filegroups,
+            )
+    
+winlibs_toolchain_extension = module_extension(
+    implementation = _winlibs_toolchain_extension_impl,
+    tag_classes = {
+        "winlibs_toolchain": tag_class(attrs = {
+            'name': attr.string(mandatory = True),
+            'winlibs_version': attr.string(default = "latest"),
+
+            'compiler_archive_package': attr.label(default = None),
+
+            'exec_compatible_with': attr.string_list(default = []),
+            'target_compatible_with': attr.string_list(default = []),
+
+            'copts': attr.string_list(default = []),
+            'conlyopts': attr.string_list(default = []),
+            'cxxopts': attr.string_list(default = []),
+            'linkopts': attr.string_list(default = []),
+            'defines': attr.string_list(default = []),
+            'includedirs': attr.string_list(default = []),
+            'linkdirs': attr.string_list(default = []),
+            'linklibs': attr.string_list(default = []),
+
+            'toolchain_extras_filegroups': attr.label_list(default = []),
+        }),
+    },
+)
