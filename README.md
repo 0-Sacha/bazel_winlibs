@@ -8,6 +8,10 @@ This module allows Bazel to utilize the MinGW toolchain for building C++ project
 ## How to Use
 MODULE.bazel
 ```python
+# use the latest commit avaible
+git_override(module_name="bazel_utilities", remote="https://github.com/0-Sacha/bazel_utilities.git", commit="7f6c3585c41278918428ed48d45b12413c197fc0")
+bazel_dep(name = "bazel_utilities", version = "0.0.1")
+
 winlibs_toolchain_extension = use_extension("@bazel_winlibs//:rules.bzl", "winlibs_toolchain_extension")
 inject_repo(winlibs_toolchain_extension, "platforms", "bazel_utilities")
 winlibs_toolchain_extension.winlibs_toolchain(
