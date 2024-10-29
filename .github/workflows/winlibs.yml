@@ -21,5 +21,7 @@ jobs:
         key: bazel
     - name: Build And Run HelloWorld on Winlibs/clang...
       run: bazelisk run --config=winlibs-clang //HelloWorld:HelloWorld
+      working-directory: Examples
     - name: Build And Run HelloWorld on Winlibs/gcc...
       run: bazelisk run --config=winlibs-gcc //HelloWorld:HelloWorld
+      working-directory: Examples
