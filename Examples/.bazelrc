@@ -1,0 +1,4 @@
+
+# Winlibs
+common:winlibs-gcc --extra_toolchains=@winlibs//:gcc-toolchain
+common:winlibs-clang --extra_toolchains=@winlibs//:clang-toolchain
