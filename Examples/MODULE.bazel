@@ -1,0 +1,22 @@
+""
+
+# buildifier: disable=module-docstring
+module(
+    name = "bazel_winlibs_examples",
+    version = "0.1",
+)
+
+git_override(module_name="bazel_utilities", remote="https://github.com/0-Sacha/bazel_utilities.git", commit="7f6c3585c41278918428ed48d45b12413c197fc0")
+local_path_override(module_name = "bazel_winlibs", path = "../")
+
+bazel_dep(name = "rules_cc", version = "0.0.10")
+bazel_dep(name = "platforms", version = "0.0.10")
+bazel_dep(name = "bazel_utilities", version = "0.0.1")
+bazel_dep(name = "bazel_winlibs", version = "0.0.1")
+
+winlibs_toolchain_extension = use_extension("@bazel_winlibs//:rules.bzl", "winlibs_toolchain_extension")
+inject_repo(winlibs_toolchain_extension, "platforms", "bazel_utilities")
+winlibs_toolchain_extension.winlibs_toolchain(name = "winlibs")
+use_repo(winlibs_toolchain_extension, "winlibs")
+# register_toolchains("@winlibs//:gcc-toolchain")
+# register_toolchains("@winlibs//:clang-toolchain")

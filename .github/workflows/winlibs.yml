@@ -1,0 +1,27 @@
+name: bazel_winlibs
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  windows-latest-winlibs:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: bazelbuild/setup-bazelisk@v3
+    - name: Mount bazel cache
+      uses: actions/cache@v4
+      with:
+        path: "~/.cache/bazel"
+        key: bazel
+    - name: Build HelloWorld on Winlibs/clang...
+      run: bazelisk build --config=winlibs-clang //HelloWorld:HelloWorld
+      working-directory: Examples
+    - name: Build HelloWorld on Winlibs/gcc...
+      run: bazelisk build --config=winlibs-gcc //HelloWorld:HelloWorld
+      working-directory: Examples
