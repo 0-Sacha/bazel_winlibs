@@ -49,9 +49,7 @@ cc_toolchain_config(
         "%{compiler_package}:clang-dbg": "dbg",
     },
 
-    cxx_builtin_include_directories = [
-        "%{compiler_package_path}include",
-        "%{compiler_package_path}x86_64-w64-mingw32/include",
+    toolchain_builtin_includedirs = [
         "%{compiler_package_path}lib/clang/%{clang_version}/include",
     ],
 
@@ -286,14 +284,10 @@ cc_toolchain_config(
         "%{compiler_package}:gcc-dbg": "dbg",
     },
     
-    cxx_builtin_include_directories = [
-        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include",
-        "%{compiler_package_path}lib/gcc/x86_64-w64-mingw32/%{gcc_version}/include-fixed",
-        "%{compiler_package_path}x86_64-w64-mingw32/include",
+    toolchain_builtin_includedirs = [
         "%{compiler_package_path}include/c++/%{gcc_version}",
         "%{compiler_package_path}include/c++/%{gcc_version}/x86_64-w64-mingw32/bits/",
         "%{compiler_package_path}include/c++/%{gcc_version}/pstl",
-        "%{compiler_package_path}include",
     ],
 
     copts = %{copts},
