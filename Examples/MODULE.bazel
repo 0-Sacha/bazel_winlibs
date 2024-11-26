@@ -6,15 +6,15 @@ module(
     version = "0.1",
 )
 
-git_override(module_name="bazel_utilities", remote="https://github.com/0-Sacha/bazel_utilities.git", commit="aa399bb2599e2cd64a35a2275ce0f73a539524a5")
-local_path_override(module_name = "bazel_winlibs", path = "../")
-
 bazel_dep(name = "rules_cc", version = "0.0.10")
 bazel_dep(name = "platforms", version = "0.0.10")
-bazel_dep(name = "bazel_utilities", version = "0.0.1")
-bazel_dep(name = "bazel_winlibs", version = "0.0.1")
 
-winlibs_toolchain_extension = use_extension("@bazel_winlibs//:rules.bzl", "winlibs_toolchain_extension")
+git_override(module_name="bazel_utilities", remote="https://github.com/0-Sacha/bazel_utilities.git", commit="aa399bb2599e2cd64a35a2275ce0f73a539524a5")
+bazel_dep(name = "bazel_utilities", version = "0.0.1", dev_dependency = True)
+local_path_override(module_name = "bazel_winlibs", path = "../")
+bazel_dep(name = "bazel_winlibs", version = "0.0.1", dev_dependency = True)
+
+winlibs_toolchain_extension = use_extension("@bazel_winlibs//:rules.bzl", "winlibs_toolchain_extension", dev_dependency = True)
 inject_repo(winlibs_toolchain_extension, "platforms", "bazel_utilities")
 winlibs_toolchain_extension.winlibs_toolchain(name = "winlibs")
 use_repo(winlibs_toolchain_extension, "winlibs")
