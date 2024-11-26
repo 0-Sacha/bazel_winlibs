@@ -2,12 +2,14 @@
 
 load("@bazel_skylib//lib:sets.bzl", "sets")
 load("@bazel_utilities//toolchains:extras_filegroups.bzl", "filegroup_translate_to_starlark")
-load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "HOST_EXTENSION")
+load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "split_host_name", "HOST_EXTENSION")
 load("@bazel_utilities//toolchains:registry.bzl", "get_archive_from_registry")
 load("@bazel_winlibs//:registry.bzl", "WINLIBS_REGISTRY")
 
 def _winlibs_compiler_archive_impl(rctx):
     host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
+    if rctx.attr.override_host_name != "" and rctx.attr.override_host_name != "local":
+        host_os, _, host_name = split_host_name(rctx.attr.override_host_name)
     
     registry = json.decode(rctx.attr.registry_json)
     archive = get_archive_from_registry(registry, "MinGW", rctx.attr.winlibs_version)
@@ -36,6 +38,8 @@ def _winlibs_compiler_archive_impl(rctx):
 winlibs_compiler_archive = repository_rule(
     implementation = _winlibs_compiler_archive_impl,
     attrs = {
+        'override_host_name': attr.string(default = "local"),
+
         'winlibs_version': attr.string(default = "latest"),
         'registry_json': attr.string(mandatory = True),
     },
@@ -44,6 +48,8 @@ winlibs_compiler_archive = repository_rule(
 
 def _winlibs_impl(rctx):
     host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
+    if rctx.attr.override_host_name != "" and rctx.attr.override_host_name != "local":
+        host_os, _, host_name = split_host_name(rctx.attr.override_host_name)
 
     registry = json.decode(rctx.attr.registry_json)
     archive = get_archive_from_registry(registry, "MinGW", rctx.attr.winlibs_version)
@@ -110,6 +116,8 @@ def _winlibs_impl(rctx):
 _winlibs_toolchain = repository_rule(
     implementation = _winlibs_impl,
     attrs = {
+        'override_host_name': attr.string(default = "local"),
+
         'winlibs_version': attr.string(default = "latest"),
         'registry_json': attr.string(mandatory = True),
 
@@ -161,6 +169,8 @@ def winlibs_toolchain(
         
         compiler_archive_package = None,
         registry = WINLIBS_REGISTRY,
+
+        override_host_name = "local",
     ):
     """MinGW Toolchain
 
@@ -192,6 +202,8 @@ def winlibs_toolchain(
         
         compiler_archive_package: The winlibs archive to use. If none are provided, one will be defined automatically
         registry: The arm registry to use, to allow close environement to provide their own mirroir/url
+
+        override_host_name: override_host_name
     """
     if registry == None:
         registry = WINLIBS_REGISTRY
@@ -221,24 +233,28 @@ def winlibs_toolchain(
         toolchain_extras_filegroups = toolchain_extras_filegroups,
 
         compiler_archive_package = compiler_archive_package,
+
+        override_host_name = override_host_name,
     )
 
 
 def _winlibs_toolchain_extension_impl(module_ctx):
-    winlibs_toolchain_versions_list = [
-        toolchain.winlibs_version
+    toolchain_versions_list = [
+        (toolchain.override_host_name, toolchain.winlibs_version)
         for mod in module_ctx.modules 
         for toolchain in mod.tags.winlibs_toolchain
     ]
-    if len(winlibs_toolchain_versions_list) == 0:
-        winlibs_toolchain_versions_list.append("latest")
-    winlibs_toolchain_versions_list = sets.to_list(sets.make(winlibs_toolchain_versions_list))
+    if len(toolchain_versions_list) == 0:
+        toolchain_versions_list.append(("local", "latest"))
+    toolchain_versions_list = sets.to_list(sets.make(toolchain_versions_list))
+
     winlibs_registry = WINLIBS_REGISTRY
-    for version in winlibs_toolchain_versions_list:
+    for toolchains_version in toolchain_versions_list:
         winlibs_compiler_archive(
-            name = "archive_winlibs-" + version,
-            winlibs_version = version,
+            name = "archive_winlibs-{}-{}".format(toolchains_version[0], toolchains_version[1]),
+            winlibs_version = toolchains_version[1],
             registry_json = json.encode(winlibs_registry),
+            override_host_name = toolchains_version[0],
         )
     
     for mod in module_ctx.modules:
@@ -266,13 +282,17 @@ def _winlibs_toolchain_extension_impl(module_ctx):
 
                 toolchain_extras_filegroups = toolchain.toolchain_extras_filegroups,
 
-                compiler_archive_package = "@archive_winlibs-" + toolchain.winlibs_version,
+                compiler_archive_package = "@archive_winlibs-{}-{}".format(toolchain.override_host_name, toolchain.winlibs_version),
+
+                override_host_name = toolchain.override_host_name,
             )
     
 winlibs_toolchain_extension = module_extension(
     implementation = _winlibs_toolchain_extension_impl,
     tag_classes = {
         "winlibs_toolchain": tag_class(attrs = {
+            'override_host_name': attr.string(default = "local"),
+
             'name': attr.string(mandatory = True),
             'winlibs_version': attr.string(default = "latest"),
 
