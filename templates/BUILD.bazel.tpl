@@ -62,8 +62,12 @@ cc_toolchain_config(
     linkdirs = [
         "%{compiler_package_path}x86_64-w64-mingw32/lib",
     ] + %{linkdirs},
-    
     linklibs = %{linklibs},
+    # dbg / opt
+    dbg_copts = %{dbg_copts},
+    dbg_linkopts = %{dbg_linkopts},
+    opt_copts = %{opt_copts},
+    opt_linkopts = %{opt_linkopts},
 
     artifacts_patterns_packed = WINLIBS_ATTIFACTS_PATTERNS["%{host_name}"],
 )
