@@ -2,7 +2,7 @@
 
 load("@bazel_skylib//lib:sets.bzl", "sets")
 load("@bazel_utilities//toolchains:extras_filegroups.bzl", "filegroup_translate_to_starlark")
-load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "split_host_name", "HOST_EXTENSION")
+load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "split_host_name")
 load("@bazel_utilities//toolchains:registry.bzl", "get_archive_from_registry")
 load("@bazel_winlibs//:registry.bzl", "WINLIBS_REGISTRY")
 
@@ -17,7 +17,6 @@ def _winlibs_compiler_archive_impl(rctx):
     substitutions = {
         "%{rctx_name}": rctx.name,
         "%{rctx_path}": "external/{}/".format(rctx.name),
-        "%{extention}": HOST_EXTENSION[host_os],
         "%{host_name}": host_name,
         "%{clang_version}": archive["details"]["clang_version"],
         "%{gcc_version}": archive["details"]["gcc_version"],
@@ -65,7 +64,6 @@ def _winlibs_impl(rctx):
 
     substitutions = {
         "%{rctx_name}": rctx.name,
-        "%{extention}": HOST_EXTENSION[host_os],
         "%{toolchain_path}": toolchain_path,
         "%{host_name}": host_name,
         "%{toolchain_id}": "winlibs_{}".format(rctx.attr.winlibs_version),
