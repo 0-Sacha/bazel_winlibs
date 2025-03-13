@@ -3,3 +3,4 @@ bazel-examples
 bazel-bazel_winlibs
 bazel-out
 bazel-testlogs
+*.lock
