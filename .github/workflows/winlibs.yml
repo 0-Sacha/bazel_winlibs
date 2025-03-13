@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - '**'
-  pull_request:
-    branches:
-      - '**'
+  # pull_request:
+  #   branches:
+  #     - '**'
 
 jobs:
   windows-latest-winlibs:
@@ -21,7 +21,7 @@ jobs:
         key: bazel
     - name: Build HelloWorld on Winlibs/clang...
       run: bazelisk build --config=winlibs-clang //HelloWorld:HelloWorld
-      working-directory: Examples
+      working-directory: examples
     - name: Build HelloWorld on Winlibs/gcc...
       run: bazelisk build --config=winlibs-gcc //HelloWorld:HelloWorld
-      working-directory: Examples
+      working-directory: examples

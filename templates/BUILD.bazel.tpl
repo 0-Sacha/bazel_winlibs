@@ -48,7 +48,7 @@ cc_toolchain_config(
         "%{compiler_package}:clang-dbg": "dbg",
     },
 
-    toolchain_builtin_includedirs = [
+    toolchain_builtin_includedirs_isystem = [
         "%{compiler_package_path}lib/clang/%{clang_version}/include",
     ],
 
@@ -58,9 +58,7 @@ cc_toolchain_config(
     linkopts = %{linkopts},
     defines = %{defines},
     includedirs = %{includedirs},
-    linkdirs = [
-        "%{compiler_package_path}x86_64-w64-mingw32/lib",
-    ] + %{linkdirs},
+    linkdirs = %{linkdirs},
     linklibs = %{linklibs},
     # dbg / opt
     dbg_copts = %{dbg_copts},
@@ -287,7 +285,7 @@ cc_toolchain_config(
         "%{compiler_package}:gcc-dbg": "dbg",
     },
     
-    toolchain_builtin_includedirs = [
+    toolchain_builtin_includedirs_isystem = [
         "%{compiler_package_path}include/c++/%{gcc_version}",
         "%{compiler_package_path}include/c++/%{gcc_version}/x86_64-w64-mingw32/bits/",
         "%{compiler_package_path}include/c++/%{gcc_version}/pstl",
