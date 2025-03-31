@@ -11,7 +11,7 @@ MODULE.bazel
 bazel_dep(name = "rules_cc", version = "0.0.10")
 bazel_dep(name = "platforms", version = "0.0.10")
 
-# use the latest commit avaible
+# use the latest commit available
 git_override(module_name="bazel_utilities", remote="https://github.com/0-Sacha/bazel_utilities.git", commit="1c3c6c01dcccc6c922c4955c92aa7c3c015a9d1c")
 git_override(module_name="bazel_winlibs", remote="https://github.com/0-Sacha/bazel_winlibs.git", commit="455905e58465eeb6e7a4a63e3ba3c7e985a3fc53")
 
@@ -32,5 +32,8 @@ It provide two toolchains `@<repo>//:gcc-toolchain` / `@<repo>//:clang-toolchain
 You can use these toolchains to compile any cc_rules in your project.
 
 ## Limitations
-Currently, there is no support for sanitizers.
+Currently, there is no support for sanitizers ! There are disabled
 The `--features=asan` flag will fail as the `-lasan` library is not found.
+
+`LTO` and `FDO` have never been tested yet !
+

@@ -1,0 +1,21 @@
+{
+    "cSpell.words": [
+        "asan",
+        "bazel",
+        "conlyopts",
+        "cxxopts",
+        "filegroup",
+        "filegroups",
+        "includedirs",
+        "isystem",
+        "lasan",
+        "linkdirs",
+        "linklibs",
+        "linkopts",
+        "rctx",
+        "sandboxed",
+        "skylib",
+        "starlark",
+        "winlibs"
+    ]
+}

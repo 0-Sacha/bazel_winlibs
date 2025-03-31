@@ -50,7 +50,10 @@ cc_toolchain_config(
 
     toolchain_builtin_includedirs_isystem = [
         "%{compiler_package_path}lib/clang/%{clang_version}/include",
-    ],
+    ] + %{toolchain_builtin_includedirs_isystem},
+    
+    toolchain_builtin_includedirs = [
+    ] + %{toolchain_builtin_includedirs},
 
     copts = %{copts},
     conlyopts = %{conlyopts},
@@ -67,6 +70,10 @@ cc_toolchain_config(
     opt_linkopts = %{opt_linkopts},
 
     artifacts_patterns_packed = [ "executable//.exe" ],
+
+    disable_lto = False,
+    disable_fdo = False,
+    disable_sanitizers = True,
 )
 
 cc_toolchain(
@@ -289,7 +296,10 @@ cc_toolchain_config(
         "%{compiler_package_path}include/c++/%{gcc_version}",
         "%{compiler_package_path}include/c++/%{gcc_version}/x86_64-w64-mingw32/bits/",
         "%{compiler_package_path}include/c++/%{gcc_version}/pstl",
-    ],
+    ] + %{toolchain_builtin_includedirs_isystem},
+    
+    toolchain_builtin_includedirs = [
+    ] + %{toolchain_builtin_includedirs},
 
     copts = %{copts},
     conlyopts = %{conlyopts},
