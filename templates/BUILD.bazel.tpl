@@ -53,7 +53,6 @@ cc_toolchain_config(
     ] + %{toolchain_builtin_includedirs_isystem},
     
     toolchain_builtin_includedirs = [
-        "%{compiler_package_path}lib/clang/%{clang_version}/include",
     ] + %{toolchain_builtin_includedirs},
 
     copts = %{copts},
@@ -297,7 +296,10 @@ cc_toolchain_config(
         "%{compiler_package_path}include/c++/%{gcc_version}",
         "%{compiler_package_path}include/c++/%{gcc_version}/x86_64-w64-mingw32/bits/",
         "%{compiler_package_path}include/c++/%{gcc_version}/pstl",
-    ],
+    ] + %{toolchain_builtin_includedirs_isystem},
+    
+    toolchain_builtin_includedirs = [
+    ] + %{toolchain_builtin_includedirs},
 
     copts = %{copts},
     conlyopts = %{conlyopts},
