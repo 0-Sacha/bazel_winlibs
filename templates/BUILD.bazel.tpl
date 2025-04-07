@@ -28,16 +28,16 @@ cc_toolchain_config_bins(
 
     compiler_type = "clang",
 
-    cpp_bin = "%{compiler_package}:cpp",
-    cc_bin = "%{compiler_package}:cc",
-    cxx_bin = "%{compiler_package}:cxx",
-    ar_bin = "%{compiler_package}:ar",
-    as_bin = "%{compiler_package}:as",
-    ld_bin = "%{compiler_package}:ld",
-    strip_bin = "%{compiler_package}:strip",
-    cov_bin = "%{compiler_package}:cov",
-    nm_bin = "%{compiler_package}:nm",
-    objdump_bin = "%{compiler_package}:objdump",
+    cpp_bin = "%{compiler_package}:clang-cpp",
+    cc_bin = "%{compiler_package}:clang-cc",
+    cxx_bin = "%{compiler_package}:clang-cxx",
+    ar_bin = "%{compiler_package}:clang-ar",
+    as_bin = "%{compiler_package}:clang-as",
+    ld_bin = "%{compiler_package}:clang-ld",
+    strip_bin = "%{compiler_package}:clang-strip",
+    cov_bin = "%{compiler_package}:clang-cov",
+    nm_bin = "%{compiler_package}:clang-nm",
+    objdump_bin = "%{compiler_package}:clang-objdump",
 
     toolchain_builtin_includedirs_isystem = [
         "%{compiler_package_path}lib/clang/%{clang_version}/include",
@@ -263,16 +263,16 @@ cc_toolchain_config_bins(
 
     compiler_type = "gcc",
 
-    cpp_bin = "%{compiler_package}:cpp",
-    cc_bin = "%{compiler_package}:cc",
-    cxx_bin = "%{compiler_package}:cxx",
-    ar_bin = "%{compiler_package}:ar",
-    as_bin = "%{compiler_package}:as",
-    ld_bin = "%{compiler_package}:ld",
-    strip_bin = "%{compiler_package}:strip",
-    cov_bin = "%{compiler_package}:cov",
-    nm_bin = "%{compiler_package}:nm",
-    objdump_bin = "%{compiler_package}:objdump",
+    cpp_bin = "%{compiler_package}:gcc-cpp",
+    cc_bin = "%{compiler_package}:gcc-cc",
+    cxx_bin = "%{compiler_package}:gcc-cxx",
+    ar_bin = "%{compiler_package}:gcc-ar",
+    as_bin = "%{compiler_package}:gcc-as",
+    ld_bin = "%{compiler_package}:gcc-ld",
+    strip_bin = "%{compiler_package}:gcc-strip",
+    cov_bin = "%{compiler_package}:gcc-cov",
+    nm_bin = "%{compiler_package}:gcc-nm",
+    objdump_bin = "%{compiler_package}:gcc-objdump",
     
     toolchain_builtin_includedirs_isystem = [
         "%{compiler_package_path}include/c++/%{gcc_version}",
