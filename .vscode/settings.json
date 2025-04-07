@@ -12,6 +12,7 @@
         "linkdirs",
         "linklibs",
         "linkopts",
+        "objdump",
         "rctx",
         "sandboxed",
         "skylib",

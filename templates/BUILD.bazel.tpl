@@ -1,6 +1,6 @@
 ""
 
-load("@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config_bins")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -22,31 +22,22 @@ filegroup(
 ####### clang #######
 #####################
 
-cc_toolchain_config(
+cc_toolchain_config_bins(
     name = "clang-cc_toolchain_config_%{toolchain_id}",
     toolchain_identifier = "clang-%{toolchain_id}",
 
     compiler_type = "clang",
 
-    toolchain_bins = {
-        "%{compiler_package}:clang-cpp": "cpp",
-        "%{compiler_package}:clang-cc": "cc",
-        "%{compiler_package}:clang-cxx": "cxx",
-        "%{compiler_package}:clang-as": "as",
-        "%{compiler_package}:clang-ar": "ar",
-        "%{compiler_package}:clang-ld": "ld",
-
-        "%{compiler_package}:clang-objcopy": "objcopy",
-        "%{compiler_package}:clang-strip": "strip",
-
-        "%{compiler_package}:clang-cov": "cov",
-
-        "%{compiler_package}:clang-size": "size",
-        "%{compiler_package}:clang-nm": "nm",
-        "%{compiler_package}:clang-objdump": "objdump",
-        "%{compiler_package}:clang-dwp": "dwp",
-        "%{compiler_package}:clang-dbg": "dbg",
-    },
+    cpp_bin = "%{compiler_package}:clang-cpp",
+    cc_bin = "%{compiler_package}:clang-cc",
+    cxx_bin = "%{compiler_package}:clang-cxx",
+    ar_bin = "%{compiler_package}:clang-ar",
+    as_bin = "%{compiler_package}:clang-as",
+    ld_bin = "%{compiler_package}:clang-ld",
+    strip_bin = "%{compiler_package}:clang-strip",
+    cov_bin = "%{compiler_package}:clang-cov",
+    nm_bin = "%{compiler_package}:clang-nm",
+    objdump_bin = "%{compiler_package}:clang-objdump",
 
     toolchain_builtin_includedirs_isystem = [
         "%{compiler_package_path}lib/clang/%{clang_version}/include",
@@ -266,31 +257,22 @@ filegroup(
 ####### gcc #######
 ###################
 
-cc_toolchain_config(
+cc_toolchain_config_bins(
     name = "gcc-cc_toolchain_config_%{toolchain_id}",
     toolchain_identifier = "gcc-%{toolchain_id}",
 
     compiler_type = "gcc",
 
-    toolchain_bins = {
-        "%{compiler_package}:gcc-cpp": "cpp",
-        "%{compiler_package}:gcc-cc": "cc",
-        "%{compiler_package}:gcc-cxx": "cxx",
-        "%{compiler_package}:gcc-as": "as",
-        "%{compiler_package}:gcc-ar": "ar",
-        "%{compiler_package}:gcc-ld": "ld",
-
-        "%{compiler_package}:gcc-objcopy": "objcopy",
-        "%{compiler_package}:gcc-strip": "strip",
-
-        "%{compiler_package}:gcc-cov": "cov",
-
-        "%{compiler_package}:gcc-size": "size",
-        "%{compiler_package}:gcc-nm": "nm",
-        "%{compiler_package}:gcc-objdump": "objdump",
-        "%{compiler_package}:gcc-dwp": "dwp",
-        "%{compiler_package}:gcc-dbg": "dbg",
-    },
+    cpp_bin = "%{compiler_package}:gcc-cpp",
+    cc_bin = "%{compiler_package}:gcc-cc",
+    cxx_bin = "%{compiler_package}:gcc-cxx",
+    ar_bin = "%{compiler_package}:gcc-ar",
+    as_bin = "%{compiler_package}:gcc-as",
+    ld_bin = "%{compiler_package}:gcc-ld",
+    strip_bin = "%{compiler_package}:gcc-strip",
+    cov_bin = "%{compiler_package}:gcc-cov",
+    nm_bin = "%{compiler_package}:gcc-nm",
+    objdump_bin = "%{compiler_package}:gcc-objdump",
     
     toolchain_builtin_includedirs_isystem = [
         "%{compiler_package_path}include/c++/%{gcc_version}",
